@@ -1,0 +1,47 @@
+{
+    "name": "aerographql-schema",
+    "version": "0.0.2",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "license": "MIT",
+    "author": {
+        "name": "Clément Vidal",
+        "email": "clementvidalpro@gmail.com"
+    },
+    "engines": {
+        "node": ">=6.9.1"
+    },
+    "scripts": {
+        "prepublishOnly": "tsc -D && jest",
+        "build": "tsc -D",
+        "test": "jest"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/aerographql/packages.git"
+    },
+    "keywords": [
+        "GraphQL",
+        "JavaScript",
+        "TypeScript",
+        "Framework",
+        "Dependencies Injection",
+        "Decorator",
+        "Schema",
+        "Schema Language",
+        "Tools"
+    ],
+    "dependencies": {
+        "aerographql-core": "^0.0.0",
+        "graphql": "^0.12.3"
+    },
+    "devDependencies": {
+        "@types/graphql": "^0.12.3",
+        "@types/jest": "^22.0.1",
+        "@types/retry": "^0.10.2",
+        "coveralls": "^3.0.0",
+        "jest": "^22.0.5",
+        "ts-jest": "^22.0.2",
+        "typescript": "^2.6.2"
+    }
+}

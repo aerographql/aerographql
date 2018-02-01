@@ -1,0 +1,11 @@
+language: node_js
+node_js:
+  - "node"
+cache: yarn
+before_install:
+  - yarn add graphql
+  - yarn add apollo-server-express
+script:
+  - yarn test --coverage
+after_success: 
+  - cat ./coverage/lcov.info | ./node_modules/.bin/coveralls
