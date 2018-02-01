@@ -9,7 +9,7 @@
 
 # AeroGraphQL Server
 
-This package let you plug an aerographql into an apollo server easily
+This package let you plug an AeroGraphQL schema into an apollo server easily
 
 # Documentation
 
