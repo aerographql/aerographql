@@ -4,5 +4,12 @@
         "packages/core",
         "packages/schema",
         "packages/server"
-    ]
+    ],
+    "scripts": {
+        "test": "jest"
+    },
+    "dependencies": {
+        "coveralls": "^3.0.0",
+        "jest": "^22.1.4"
+    }
 }

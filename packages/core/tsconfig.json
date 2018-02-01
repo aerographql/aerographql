@@ -1,17 +1,6 @@
 {
+    "extends": "../../tsconfig.json",
     "compilerOptions": {
-        "target": "es6",
-        "module": "commonjs",
-        "moduleResolution": "node",
-        "sourceMap": true,
-        "emitDecoratorMetadata": true,
-        "experimentalDecorators": true,
-        "noImplicitAny": true,
-        "lib": [
-            "es6",
-            "dom",
-            "esnext.asynciterable"
-        ],
         "outDir": "./dist"
     },
     "include": [
