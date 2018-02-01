@@ -34,8 +34,6 @@ export function Field( config: FieldConfig = {} ) {
             if ( list )
                 throw new Error( 'Field type must be explicilty provided when field is a list' );
 
-            if ( !inferedType )
-                console.log( target, property )
             let metaObject = getMetaObject( inferedType );
             if ( metaObject ) {
                 type = metaObject.name;

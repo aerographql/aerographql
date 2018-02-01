@@ -1,10 +1,16 @@
 import 'reflect-metadata';
-import { graphqlExpress, graphiqlExpress } from 'apollo-server-express';
+
+import { GraphQLOptions } from 'apollo-server-core';
+import { GraphiQLData } from 'apollo-server-module-graphiql';
+import { graphqlExpress, graphiqlExpress, ExpressHandler } from 'apollo-server-express';
 import {
     SchemaMetaObject, FactoryContext, Context,
     SchemaConfig, getSchemaProviders, schemaFactory, MiddlewareError
 } from 'aerographql-schema';
-import { getMetaObject, META_KEY_METAOBJECT,  Injector, Provider } from 'aerographql-core';
+import {
+    getMetaObject, META_KEY_METAOBJECT, Injector,
+    Provider
+} from 'aerographql-core';
 
 
 /**
@@ -66,11 +72,11 @@ export class BaseApolloServer {
 
     }
 
-    getGraphiQLMiddleware(): any {
-        return graphiqlExpress( { endpointURL: '/graphql' } );
+    getGraphiQLMiddleware( options: Partial<GraphiQLData> = null ): any {
+        return graphiqlExpress( Object.assign( {}, { endpointURL: '/graphql' }, options ) );
     }
 
-    getGraphQLMiddleware(): any {
+    getGraphQLMiddleware( options: Partial<GraphQLOptions> = null ): ExpressHandler {
         let factoryContext = new FactoryContext( this.rootInjector );
         let graphqlSchema = schemaFactory( this.metadata.schema, factoryContext );
 
@@ -86,10 +92,18 @@ export class BaseApolloServer {
             if ( req.credentials )
                 context.credentials = req.credentials;
 
-            return {
+            if ( options ) {
+                // Merge custom context passed
+                if ( options.context ){
+                    context = Object.assign( {}, options.context, context );
+                }
+            }
+            let o = Object.assign( {}, options, {
                 schema: graphqlSchema,
                 context: context
-            };
+            } );
+
+            return o;
         } );
     }
 }
