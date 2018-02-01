@@ -1,4 +1,5 @@
-atus](https://travis-ci.org/aerographql/server.svg?branch=master)](https://travis-ci.org/aerographql/server)  [![Coverage Status](https://coveralls.io/repos/github/aerographql/server/badge.svg?branch=master)](https://coveralls.io/github/aerographql/server?branch=master)
+[![Build Status](https://travis-ci.org/aerographql/packages.svg?branch=master)](https://travis-ci.org/aerographql/packages)
+[![Coverage Status](https://coveralls.io/repos/github/aerographql/packages/badge.svg?branch=master)](https://coveralls.io/github/aerographql/packages?branch=master)
 
 <p align="center">
   <img src="https://aerographql.github.io/documentation/images/logo-full.png">
