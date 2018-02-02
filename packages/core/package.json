@@ -12,7 +12,7 @@
         "node": ">=6.9.1"
     },
     "scripts": {
-        "prepublishOnly": "tsc -D && jest",
+        "prepublishOnly": "rm -rf ./dist && tsc -D && jest",
         "build": "tsc -D",
         "test": "jest"
     },
@@ -36,7 +36,6 @@
     },
     "devDependencies": {
         "@types/jest": "^22.0.1",
-        "coveralls": "^3.0.0",
         "jest": "^22.0.5",
         "ts-jest": "^22.0.2",
         "typescript": "^2.6.2"
