@@ -1,4 +1,4 @@
-import { GraphQLInterfaceType, GraphQLInterfaceTypeConfig } from 'graphql';
+import { GraphQLInterfaceType, GraphQLInterfaceTypeConfig, GraphQLResolveInfo } from 'graphql';
 import { METAOBJECT_TYPES, getMetaObject } from 'aerographql-core';
 
 import { InterfaceMetaObject } from './interface';
@@ -18,6 +18,9 @@ export let interfaceFactory = function ( anyDef: InterfaceMetaObject | Function,
 
     conf.name = def.name;
 
+    if ( def.description )
+        conf.description = def.description;
+
     conf.fields = () => {
         let fields: any = {};
         for ( let key in def.fields )
@@ -25,8 +28,11 @@ export let interfaceFactory = function ( anyDef: InterfaceMetaObject | Function,
         return fields;
     };
 
-    if ( def.description )
-        conf.description = def.description;
+    conf.resolveType = ( value: any, info: GraphQLResolveInfo ) => {
+        let typeName = value.constructor.name;
+        let type = context.lookupType( typeName );
+        return type;
+    }
 
     let o = new GraphQLInterfaceType( conf );
     context.interfaceMap.set( conf.name, o );

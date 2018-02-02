@@ -76,9 +76,11 @@ export let schemaFactory = function ( anyDef: SchemaMetaObject | Function, conte
     if ( rootMutation && !context.isValidType( rootMutationName ) )
         throw new Error( `Invalid root mutation name: "${rootMutationName}"` );
 
+    let typeList = Array.from( context.objectMap ).map( i => i[1] );
     return new GraphQLSchema( {
         query: rootQuery,
-        mutation: rootMutation
+        mutation: rootMutation,
+        types: typeList
     } );
 
 }

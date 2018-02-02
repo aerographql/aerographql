@@ -1,4 +1,4 @@
-import { GraphQLSchema } from 'graphql';
+import { GraphQLSchema, printSchema } from 'graphql';
 import { SchemaMetaObject, FactoryContext, getSchemaProviders, schemaFactory } from 'aerographql-schema';
 import { getMetaObject, Injector } from 'aerographql-core';
 
@@ -21,6 +21,10 @@ export class BaseSchema {
 
         let factoryContext = new FactoryContext( this.rootInjector );
         this.graphQLSchema = schemaFactory( metadata, factoryContext );
+    }
+
+    toString() {
+        return printSchema( this.graphQLSchema );
     }
 
 }

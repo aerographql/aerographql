@@ -99,6 +99,14 @@ export let objectTypeFactory = function ( defsCtr: Function[], implsCtr: Functio
 
     conf.description = desc.trim();
 
+    conf.isTypeOf = ( value: any, info: any ) => {
+        let t = context.lookupType( value.constructor.name );
+        if( t )
+            return t.name === name;
+
+        return false;
+    }
+
     let o = new GraphQLObjectType( conf );
     context.objectMap.set( conf.name, o );
     return o;
