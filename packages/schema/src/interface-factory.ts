@@ -36,6 +36,12 @@ export let interfaceFactory = function ( anyDef: InterfaceMetaObject | Function,
             return p.name;
         }
 
+        // If object type cannot be resolved using metadata, check if there is a user provided __typename field on this object
+        // that could tell us what's the type of thie object
+        if( value.__typename )
+            return value.__typename;
+
+        // If type still cannot be found, check if there is a user provided resolveType method
         if ( def.resolveType )
             return def.resolveType( value, context, info )
 
