@@ -28,10 +28,18 @@ export let interfaceFactory = function ( anyDef: InterfaceMetaObject | Function,
         return fields;
     };
 
-    conf.resolveType = ( value: any, info: GraphQLResolveInfo ) => {
-        let typeName = value.constructor.name;
-        let type = context.lookupType( typeName );
-        return type;
+    conf.resolveType = ( value: any, context: any, info: any ) => {
+
+        // If Object was builded using new operator on an annotated constructor, it fairly easy to find out it's type
+        let p = getMetaObject( value.constructor );
+        if ( p ) {
+            return p.name;
+        }
+
+        if ( def.resolveType )
+            return def.resolveType( value, context, info )
+
+        return null;
     }
 
     let o = new GraphQLInterfaceType( conf );

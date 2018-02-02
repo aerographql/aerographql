@@ -1,6 +1,8 @@
 import { GraphQLObjectTypeConfig, GraphQLObjectType } from 'graphql';
 import { getMetaObject, METAOBJECT_TYPES } from 'aerographql-core';
 
+import { FieldMetaObject } from './field';
+import { ResolverMetaObject } from './resolver';
 import { ObjectDefinitionMetaObject } from './object-definition';
 import { ObjectImplementationMetaObject } from './object-implementation';
 import { FactoryContext } from './factory-context';
@@ -31,30 +33,45 @@ export let objectTypeFactory = function ( defsCtr: Function[], implsCtr: Functio
         fields: {}
     };
 
+    let availableFields: { [ key: string ]: FieldMetaObject } = {};
+    defs.forEach( def => {
+        for ( let key in def.fields ) {
+            if ( availableFields[ key ] )
+                throw new Error( `Field "${key}" in definition of type "${name}" is defined more than one time` );
+            availableFields[ key ] = def.fields[ key ];
+        }
+    } );
+
+    let availableResolvers: { [ key: string ]: ResolverMetaObject } = {};
+    impls.forEach( impl => {
+        for ( let key in impl.fields ) {
+            if ( availableResolvers[ key ] )
+                throw new Error( `Field "${key}" in implementation of type "${name}" is defined more than one time` );
+            availableResolvers[ key ] = impl.fields[ key ];
+        }
+    } );
+
     // Populate GQL fields
     conf.fields = () => {
         let fields: any = {};
 
         // Add fields from the definitions
-        defs.forEach( def => {
-            for ( let key in def.fields ) {
-                if ( fields[ key ] )
-                    throw new Error( `Field "${key}" in definition of type "${name}" is defined more than one time` );
-                fields[ key ] = fieldConfigFactory( def.fields[ key ], context );
-            }
-        } );
+        for ( let key in availableFields ) {
+            fields[ key ] = fieldConfigFactory( availableFields[ key ], context );
+        }
 
         // add fields for each implementations
-        impls.forEach( impl => {
-            for ( let key in impl.fields ) {
-                if ( fields[ key ] )
-                    throw new Error( `Field "${key}" in implementation of type "${name}" is defined more than one time` );
-                fields[ key ] = resolverConfigFactory( impl.fields[ key ], key, context );
-            }
-        } );
+        for ( let key in availableResolvers ) {
+            fields[ key ] = resolverConfigFactory( availableResolvers[ key ], key, context );
+        }
 
         return fields;
     };
+
+    // Count total number of interface this object is implementing
+    let implementedInterfaceCount = 0;
+    implementedInterfaceCount += defs.reduce( ( acc, def ) => { return acc + def.implements.length }, 0 );
+    implementedInterfaceCount += impls.reduce( ( acc, impl ) => { return acc + impl.implements.length }, 0 );
 
     // Populate GQL interface
     conf.interfaces = () => {
@@ -85,12 +102,12 @@ export let objectTypeFactory = function ( defsCtr: Function[], implsCtr: Functio
         return interfaces;
     };
 
+    // Concatenate description
     let desc = '';
     desc = defs.reduce( ( acc, i ) => {
         if ( i.description ) acc = i.description + '\n' + acc;
         return acc;
     }, desc );
-
 
     desc = impls.reduce( ( acc, i ) => {
         if ( i.description ) acc = i.description + '\n' + acc;
@@ -98,14 +115,6 @@ export let objectTypeFactory = function ( defsCtr: Function[], implsCtr: Functio
     }, desc );
 
     conf.description = desc.trim();
-
-    conf.isTypeOf = ( value: any, info: any ) => {
-        let t = context.lookupType( value.constructor.name );
-        if( t )
-            return t.name === name;
-
-        return false;
-    }
 
     let o = new GraphQLObjectType( conf );
     context.objectMap.set( conf.name, o );

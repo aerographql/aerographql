@@ -39,7 +39,7 @@ class TestType1 {
 class TestType2 {
     @Field( { type: 'Int' } ) fieldA: number = 0;
     @Field() fieldB: string = "String";
-    @Field() fieldC: number = 1;
+    @Field() fieldD: number = 1;
 }
 
 @ObjectImplementation( { name: 'TestRootQuery' } )
@@ -56,8 +56,6 @@ class TestRootQuery {
         TestRootQuery.spy( context );
         return new TestType2();
     }
-
-
 }
 @Schema( { rootQuery: 'TestRootQuery', components: [ TestRootQuery, TestInterface, TestType1, TestType2] } )
 class TestSchema extends BaseSchema {
@@ -138,13 +136,13 @@ describe( 'Interface', () => {
         let request = httpMocks.createRequest( {
             method: 'POST',
             body: { query: `{ 
-                    query2 { fieldA fieldB ... on TestType2 { fieldC } } }` }
+                    query2 { fieldA fieldB ... on TestType2 { fieldD } } }` }
         } );
 
         middleware( request, response, null );
         response.on( 'end', () => {
             var gqlResponse = JSON.parse( response._getData() ); 
-            expect( gqlResponse.data.query2 ).toEqual( { fieldA: 0, fieldB: "String", fieldC: 1 } );
+            expect( gqlResponse.data.query2 ).toEqual( { fieldA: 0, fieldB: "String", fieldD: 1 } );
             expect( response.statusCode ).toBe( 200 );
             done();
         } );

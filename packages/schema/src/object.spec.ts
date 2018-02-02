@@ -2,6 +2,9 @@ import {
     GraphQLSchema, GraphQLObjectType, GraphQLScalarType, GraphQLNonNull, GraphQLList,
     GraphQLInputObjectType, GraphQLResolveInfo
 } from 'graphql';
+import { EventEmitter } from 'events'
+import { ExpressHandler, graphqlExpress } from 'apollo-server-express';
+import * as httpMocks from 'node-mocks-http';
 import {
     getMetaObject, getMetaObjectType,
     METAOBJECT_TYPES, TestBed, Injector
@@ -16,6 +19,8 @@ import { Arg } from './arg';
 import { Middleware } from './middleware';
 import { objectTypeFactory } from './object-factory';
 import { FactoryContext } from './factory-context';
+import { Schema } from './schema';
+import { BaseSchema } from './base-schema';
 
 
 let callIndex = 0;
@@ -74,7 +79,7 @@ class TypeImplA {
 
     @Resolver( {
         type: 'Int',
-        middlewares: [ MiddlewareC, { provider: MiddlewareB, options: 'MwOptions' }]
+        middlewares: [ MiddlewareC, { provider: MiddlewareB, options: 'MwOptions' } ]
     } )
     resolverA( @Arg() input: InputA ) {
         return 'ResolverAReturn';
@@ -193,8 +198,8 @@ describe( 'typeFactory', () => {
         factoryContext = new FactoryContext( injector );
 
         inputA = inputFactory( InputA, factoryContext );
-        typeA = objectTypeFactory( [TypeA], [TypeImplA], factoryContext );
-        typeB = objectTypeFactory( [TypeB], [TypeImplB1], factoryContext );
+        typeA = objectTypeFactory( [ TypeA ], [ TypeImplA ], factoryContext );
+        typeB = objectTypeFactory( [ TypeB ], [ TypeImplB1 ], factoryContext );
     } );
 
     describe( 'with a type definition', () => {
@@ -257,8 +262,8 @@ describe( 'typeFactory', () => {
             expect( resovlerB ).not.toBeUndefined();
             expect( resovlerB.name ).toBe( 'resolverB' );
             expect( resovlerB.args ).toHaveLength( 1 );
-        })
-    });
+        } )
+    } );
 
     describe( 'with middleware for resolvers defined at the field implementation level', () => {
         let resovlerA: any;
@@ -367,7 +372,58 @@ describe( 'typeFactory', () => {
                 } );
             } );
         } );
-
     } );
+} )
+
+@ObjectDefinition( {
+    name: 'TestType1'
+} )
+class TestType1 {
+    @Field( { type: 'Int' } ) fieldA: number = 0;
+    @Field() fieldB: string = "String";
+}
+
+@ObjectImplementation( { name: 'TestRootQuery' } )
+class TestRootQuery {
+    static spy: jest.Mock;
+    @Resolver( { type: TestType1 } )
+    query1( parent: any, context: any ) {
+        TestRootQuery.spy( context );
+        return new TestType1();
+    }
+}
+@Schema( { rootQuery: 'TestRootQuery', components: [ TestRootQuery, TestType1 ] } )
+class TestSchema extends BaseSchema {
+}
+
+
+describe( 'Object', () => {
+    let response: httpMocks.MockResponse;
+    let schema: TestSchema;
+    let middleware: ExpressHandler;
+
+    beforeEach( () => {
+        schema = new TestSchema();
+        response = httpMocks.createResponse( { eventEmitter: EventEmitter } );
+        TestRootQuery.spy = jest.fn();
+        middleware = graphqlExpress( { schema: schema.graphQLSchema } );
+    } )
+
+    it( 'should work with simple query', ( done ) => {
+        let request = httpMocks.createRequest( {
+            method: 'POST',
+            body: {
+                query: `{ query1 { fieldA fieldB  } }`
+            }
+        } );
+
+        middleware( request, response, null );
+        response.on( 'end', () => {
+            var gqlResponse = JSON.parse( response._getData() );
+            expect( gqlResponse.data.query1 ).toEqual( { fieldA: 0, fieldB: "String" } );
+            expect( response.statusCode ).toBe( 200 );
+            done();
+        } );
+    } )
 
 } )
