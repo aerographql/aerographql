@@ -21,7 +21,7 @@ export function Resolver( config: ResolverConfig ): MethodDecorator {
 
         // Check if type is an array
         let list = false;
-        if( config.list !== undefined ) {
+        if ( config.list !== undefined ) {
             list = config.list;
         } else {
             let t = Reflect.getMetadata( META_KEY_DESIGN_TYPE, target, resolverName );
@@ -34,11 +34,15 @@ export function Resolver( config: ResolverConfig ): MethodDecorator {
         // Extract resolver type
         let type = config.type as string;
         if ( typeof config.type === "function" ) {
-            if ( !isOfMetaObjectType( config.type, METAOBJECT_TYPES.scalar ) && !isOfMetaObjectType( config.type, METAOBJECT_TYPES.objectDefinition ) ) {
-                throw new Error( `Field "${name}" is neither a scalar or an object type` )
+            if ( isOfMetaObjectType( config.type, METAOBJECT_TYPES.scalar ) ||
+                isOfMetaObjectType( config.type, METAOBJECT_TYPES.interface ) ||
+                isOfMetaObjectType( config.type, METAOBJECT_TYPES.objectDefinition ) ) {
+                    
+                let m = getMetaObject( config.type ) as any;
+                type = m.name;
+            } else {
+                throw new Error( `Field "${resolverName}" is neither a scalar, an interface or an object type` )
             }
-            let m = getMetaObject( config.type ) as any;
-            type = m.name;
         }
 
         // Prepare middleware
