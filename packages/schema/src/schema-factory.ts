@@ -19,16 +19,20 @@ export let schemaFactory = function ( anyDef: SchemaMetaObject | Function, conte
     if ( typeof anyDef === 'function' )
         schemaMetaObject = getMetaObject<SchemaMetaObject>( anyDef, METAOBJECT_TYPES.schema );
 
+    // Take the linear list of component and classify iy by types
     let components = classifyComponents( schemaMetaObject.components );
 
+    // Create interfaces
     components.interfaces.forEach( interfaceDef => {
         context.interfaceMap.set( interfaceDef.name, interfaceFactory( interfaceDef, context ) );
     } );
 
+    // Then Input objects
     components.inputObject.forEach( inputDef => {
         context.inputMap.set( inputDef.name, inputFactory( inputDef, context ) );
     } );
 
+    // Then scalar
     components.scalar.forEach( scalarCtr => {
         context.scalarMap.set( scalarCtr.name, scalarFactory( scalarCtr, context ) );
     } );

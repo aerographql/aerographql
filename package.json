@@ -2,8 +2,7 @@
     "private": true,
     "workspaces": [
         "packages/core",
-        "packages/schema",
-        "packages/server"
+        "packages/schema"
     ],
     "scripts": {
         "test": "jest"

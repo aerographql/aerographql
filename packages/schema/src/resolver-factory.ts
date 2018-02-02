@@ -42,7 +42,7 @@ export let resolverConfigFactory = function ( impl: ResolverMetaObject, fieldNam
 
         if ( impl.args[ key ].list )
             argType = new GraphQLList<any>( argType );
-            
+
         if ( !impl.args[ key ].nullable )
             argType = new GraphQLNonNull<any>( argType );
 
@@ -57,6 +57,11 @@ export let resolverConfigFactory = function ( impl: ResolverMetaObject, fieldNam
 
         // Wrap each middleware call in a closure that always return a promise
         let wrappedMwCalls: MiddlewareSignature[] = [];
+
+        // Normalize context
+        if ( !context ) context = {};
+        if ( !context.middlewareOptions ) context.middlewareOptions = null;
+        if ( !context.middlewareResults ) context.middlewareResults = [];
 
         impl.middlewares.forEach( mwInfo => {
             let mwInstance: BaseMiddleware = factoryContext.injector.get( mwInfo.provider, null );
@@ -101,7 +106,6 @@ export let resolverConfigFactory = function ( impl: ResolverMetaObject, fieldNam
 
             // Store the closure
             wrappedMwCalls.push( closure );
-
         } );
 
 
@@ -135,10 +139,7 @@ export let resolverConfigFactory = function ( impl: ResolverMetaObject, fieldNam
         // Execute each wrapped middleware call sequentialy
         return executePromiseSequenticaly( wrappedMwCalls ).then( results => {
             // Attach middleware results
-            if ( !context ) context = {
-                credentials: null,
-                middlewareResults: []
-            };
+
             context.middlewareResults = results;
             return Reflect.apply( resolveFunction, instance, expandedArgs );
         }, ( middlewareError: MiddlewareError ) => {

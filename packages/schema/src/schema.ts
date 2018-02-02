@@ -41,6 +41,11 @@ export function classifyComponents( components: Function[] ): ClassifiedComponen
     return classifiedComponents;
 }
 
+/**
+ * Return a list of providers to inject in an injector in order for this schema to be correctly wired.
+ * 
+ * @param schema The input Constructor of the Schema class
+ */
 export function getSchemaProviders( schema: Function ) {
     let schemaMetaObject = getMetaObject<SchemaMetaObject>( schema, METAOBJECT_TYPES.schema );
     if ( !schemaMetaObject )
@@ -67,6 +72,9 @@ export function getSchemaProviders( schema: Function ) {
         }
     } );
 
+    // And finaly add explict providers
+    schemaMetaObject.providers.forEach( p => providers.add( p ) );
+
     return Array.from( providers );
 }
 
@@ -84,13 +92,18 @@ export function Schema( config: SchemaConfig ) {
             description: desc,
             rootMutation: null,
             rootQuery: null,
-            components: []
+            components: [],
+            providers: []
         };
 
         md.rootQuery = config.rootQuery;
 
         if ( config.rootMutation ) {
             md.rootMutation = config.rootMutation;
+        }
+
+        if ( config.providers ) {
+            md.providers = deduplicateArray( config.providers );
         }
 
         md.components = config.components;
@@ -105,6 +118,7 @@ export interface SchemaConfig {
     description?: string;
     rootQuery: string,
     rootMutation?: string,
+    providers?: Function[],
     components: Function[]
 }
 
@@ -112,5 +126,6 @@ export interface SchemaMetaObject {
     description: string;
     rootQuery: string,
     rootMutation: string,
-    components: Function[]
+    components: Function[],
+    providers: Function[]
 }

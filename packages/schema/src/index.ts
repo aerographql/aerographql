@@ -5,6 +5,7 @@ export * from './input-object';
 export * from './schema';
 export * from './scalar';
 export * from './schema';
+export * from './base-schema';
 export * from './schema-factory';
 export * from './factory-context';
 export * from './middleware';
