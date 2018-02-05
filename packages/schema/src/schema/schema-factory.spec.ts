@@ -85,7 +85,6 @@ class TypeImplA {
 }
 
 @Schema( {
-    description: 'Schema',
     rootQuery: 'TypeA',
     components: [ TypeA, InputA, TypeImplA ],
 } )
