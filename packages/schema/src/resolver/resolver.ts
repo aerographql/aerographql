@@ -36,12 +36,13 @@ export function Resolver( config: ResolverConfig ): MethodDecorator {
         if ( typeof config.type === "function" ) {
             if ( isOfMetaObjectType( config.type, METAOBJECT_TYPES.scalar ) ||
                 isOfMetaObjectType( config.type, METAOBJECT_TYPES.interface ) ||
-                isOfMetaObjectType( config.type, METAOBJECT_TYPES.objectDefinition ) ) {
+                isOfMetaObjectType( config.type, METAOBJECT_TYPES.objectDefinition )  ||
+                isOfMetaObjectType( config.type, METAOBJECT_TYPES.union )) {
                     
                 let m = getMetaObject( config.type ) as any;
                 type = m.name;
             } else {
-                throw new Error( `Field "${resolverName}" is neither a scalar, an interface or an object type` )
+                throw new Error( `Field "${resolverName}" is neither a scalar, an interface, an object or an union type` )
             }
         }
 

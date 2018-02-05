@@ -4,7 +4,7 @@ import {
     Provider,
     META_KEY_METAOBJECT, META_KEY_RESOLVERS_MAP, METAOBJECT_TYPES,
     META_KEY_METAOBJECT_TYPE, getFunctionParametersName, META_KEY_DESIGN_PARAMSTYPES, META_KEY_ARGS_MAP,
-    META_KEY_DESIGN_TYPE, isOfMetaObjectType, getMetaObject, convertTypeFromTsToGraphQL, ensureMetadata
+    META_KEY_DESIGN_TYPE, isOfMetaObjectType, getMetaObject, convertTypeFromTsToGraphQL, ensureMetadata, getMetaObjectType
 } from 'aerographql-core';
 import { ResolverMetaObjectMap, ResolverMiddlewareMetaObject } from '../resolver';
 import { ArgsMetaObject, getArgsMetaObject } from '../arg';
@@ -27,6 +27,15 @@ export function ObjectImplementation( config: ObjectImplementationConfig = {} ) 
         let implementInterfaces: Function[] = [];
         if ( config.implements )
             implementInterfaces = config.implements;
+
+        // Add this object to the list of implementers of each interfaces
+        implementInterfaces.forEach( i => {
+            if ( getMetaObjectType( i ) !== METAOBJECT_TYPES.interface )
+                throw new Error( 'Object implementation "${config.name}" implement an invalid interface' );
+
+            let mo = getMetaObject<InterfaceMetaObject>( i, METAOBJECT_TYPES.interface );
+            mo.implementers.push( ctr );
+        } );
 
         // Extract middleware defined at the type level 
         let typeMiddlewares: ResolverMiddlewareMetaObject[] = [];

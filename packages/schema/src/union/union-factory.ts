@@ -6,20 +6,20 @@ import { UnionMetaObject } from './union';
 
 export let unionFactory = function ( ctr: Function, context: FactoryContext ) {
 
-    let def = getMetaObject<UnionMetaObject>( ctr, METAOBJECT_TYPES.union );
+    let metaObject = getMetaObject<UnionMetaObject>( ctr, METAOBJECT_TYPES.union );
 
     let conf: GraphQLUnionTypeConfig<any, any> = {
         name: '',
         types: null
     }
 
-    conf.name = def.name;
+    conf.name = metaObject.name;
 
-    if ( def.description )
-        conf.description = def.description;
+    if ( metaObject.description )
+        conf.description = metaObject.description;
 
     conf.types = () => {
-        return def.types.map( def => {
+        return metaObject.types.map( def => {
             let t = context.lookupType( def.name );
             if ( !t )
                 throw new Error( 'Union "${conf.name}" reference an invalid type: "${def.name}"' )
@@ -28,7 +28,7 @@ export let unionFactory = function ( ctr: Function, context: FactoryContext ) {
         );
     }
 
-    conf.resolveType = createdResolveType( def, context );
+    conf.resolveType = createdResolveType( metaObject.resolveType, metaObject.types );
 
     let o = new GraphQLUnionType( conf );
     context.unionMap.set( conf.name, o );

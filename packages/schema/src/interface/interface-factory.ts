@@ -7,26 +7,26 @@ import { fieldConfigFactory } from '../field';
 
 export let interfaceFactory = function ( ctr: Function, context: FactoryContext ) {
 
-    let def = getMetaObject<InterfaceMetaObject>( ctr, METAOBJECT_TYPES.interface );
+    let metaObject = getMetaObject<InterfaceMetaObject>( ctr, METAOBJECT_TYPES.interface );
 
     let conf: GraphQLInterfaceTypeConfig<any, any> = {
         name: '',
         fields: {}
     }
 
-    conf.name = def.name;
+    conf.name = metaObject.name;
 
-    if ( def.description )
-        conf.description = def.description;
+    if ( metaObject.description )
+        conf.description = metaObject.description;
 
     conf.fields = () => {
         let fields: any = {};
-        for ( let key in def.fields )
-            fields[ key ] = fieldConfigFactory( def.fields[ key ], context );
+        for ( let key in metaObject.fields )
+            fields[ key ] = fieldConfigFactory( metaObject.fields[ key ], context );
         return fields;
     };
 
-    conf.resolveType = createdResolveType( def, context );
+    conf.resolveType = createdResolveType( metaObject.resolveType, metaObject.implementers );
 
     let o = new GraphQLInterfaceType( conf );
     context.interfaceMap.set( conf.name, o );

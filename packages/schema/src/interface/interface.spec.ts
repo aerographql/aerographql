@@ -46,7 +46,11 @@ class TestRootQuery {
     @Resolver( { type: TestInterface } )
     query1( parent: any, context: any ) {
         TestRootQuery.spy( context );
-        return new TestType1();
+        return {
+            fieldA: 0,
+            fieldB: 'String',
+            fieldC: 'String'
+        };
     }
 
     @Resolver( { type: TestInterface } )
@@ -147,5 +151,5 @@ describe( 'When used from an express middleware, Interface', () => {
             done();
         } );
     } )
-} )
+} );
 

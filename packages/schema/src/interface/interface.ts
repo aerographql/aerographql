@@ -23,7 +23,8 @@ export function Interface( config: InterfaceConfig = {} ) {
             name: name,
             description: desc,
             fields: fields,
-            resolveType: config.resolveType
+            resolveType: config.resolveType,
+            implementers: []
         };
 
         Reflect.defineMetadata( META_KEY_METAOBJECT, md, ctr );
@@ -40,4 +41,5 @@ export interface InterfaceMetaObject {
     description: string;
     fields: FieldMetaObjectMap;
     resolveType: ResolveTypeFunction;
+    implementers: Function[];
 }
