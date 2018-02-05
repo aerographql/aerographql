@@ -16,7 +16,6 @@ export function Field( config: FieldConfig = {} ) {
         if ( config.description ) desc = config.description;
 
         let name = property;
-        if ( config.name ) name = config.name;
 
         let nullable = !!config.nullable;
         if ( config.nullable === undefined ) {
@@ -71,7 +70,6 @@ export interface FieldConfig {
     type?: string | Function;
     nullable?: Boolean;
     description?: string;
-    name?: string;
 }
 
 export interface FieldMetaObject {

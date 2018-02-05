@@ -6,7 +6,6 @@ import { getMetaObject, ID } from 'aerographql-core';
 
 describe( '@Arg decorator', () => {
 
-
     @ObjectDefinition()
     class TypeDef1 { };
 

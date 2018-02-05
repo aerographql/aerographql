@@ -1,2 +1,2 @@
 export * from './field';
-export * from './field-factory';
+export * from './field-config-factory';

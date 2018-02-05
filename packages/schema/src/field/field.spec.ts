@@ -8,37 +8,29 @@ import { InputObject, InputObjectMetaObject } from '../input-object';
 import { ObjectDefinition, ObjectDefinitionMetaObject } from '../object';
 import { Field } from './field';
 
-@ObjectDefinition( {
-    name: 'TypeB',
-    description: 'Desc',
-} )
-class TestTypeB {
-    @Field( { type: 'Int' } ) fieldA: number;
-    @Field( { type: 'Float' } ) fieldB: number[];
-}
-
-@ObjectDefinition( {
-    name: 'TypeA',
-    description: 'Desc',
-} )
-class TestTypeA {
-    @Field( { type: 'Int', description: 'Desc' } ) fieldA: number;
-    @Field( { type: 'String', description: 'Desc', nullable: true } ) fieldB: number;
-    @Field( { type: 'Float', description: 'Desc' } ) fieldC: number[];
-    @Field( { type: TestTypeB, description: 'Desc' } ) fieldD: TestTypeB[];
-}
-
-@Schema( {
-    rootQuery: 'TypeA',
-    components: [ TestTypeA, TestTypeB ]
-} )
-class TestSchemaA { }
 
 
 describe( '@Field decorator', () => {
+
+    @ObjectDefinition( { name: 'TypeA', description: 'Desc', } )
+    class TypeA {
+        @Field( { type: 'Int' } ) fieldA: number;
+        @Field( { type: 'Float' } ) fieldB: number[];
+        @Field( { type: TypeA, description: 'Desc' } ) fieldC: TypeA[];
+    }
+
+
+    it( 'should throw if using array for a field without explicit type', () => {
+        expect( () => {
+            @ObjectDefinition( { name: 'TypeB' } )
+            class TypeB { @Field() fieldB: number[]; }
+
+        } ).toThrowError();
+    } )
+
     it( 'should set the correct fields metadata', () => {
-        expect( getMetaObject( TestTypeB ) ).not.toBeNull();
-        let md = getMetaObject<ObjectDefinitionMetaObject>( TestTypeB );
+        expect( getMetaObject( TypeA ) ).toBeDefined();
+        let md = getMetaObject<ObjectDefinitionMetaObject>( TypeA );
 
         expect( md.fields ).toHaveProperty( 'fieldA' );
         expect( md.fields.fieldA.nullable ).toBe( false );
@@ -51,25 +43,47 @@ describe( '@Field decorator', () => {
         expect( md.fields.fieldB.list ).toBe( true );
         expect( md.fields.fieldB.type ).toBe( 'Float' );
         expect( md.fields.fieldB.description ).toBeNull();
+
     } );
 
     it( 'should extract the right field type', () => {
 
-        let md = getMetaObject<ObjectDefinitionMetaObject>( TestTypeA )
-        expect( md ).not.toBeNull();
-        expect( md.fields ).toHaveProperty( 'fieldD' );
-        expect( md.fields.fieldD.type ).toBe( 'TypeB' );
-
-        md = getMetaObject<ObjectDefinitionMetaObject>( TestTypeB )
-        expect( md ).not.toBeNull();
-        expect( md.fields ).toHaveProperty( 'fieldA' );
-        expect( md.fields.fieldA.type ).toBe( 'Int' );
+        let mo = getMetaObject<ObjectDefinitionMetaObject>( TypeA )
+        expect( mo ).toBeDefined();
+        expect( mo.fields ).toHaveProperty( 'fieldC' );
+        expect( mo.fields.fieldC.type ).toBe( 'TypeA' );
+        expect( mo.fields ).toHaveProperty( 'fieldA' );
+        expect( mo.fields.fieldA.type ).toBe( 'Int' );
+        expect( mo.fields ).toHaveProperty( 'fieldB' );
+        expect( mo.fields.fieldB.type ).toBe( 'Float' );
+        expect( mo.fields.fieldB.list ).toBe( true );
+        expect( mo.fields.fieldB.nullable ).toBe( false );
 
     } )
 } );
 
 
 describe( 'fieldConfigFactory function', () => {
+
+    @ObjectDefinition( { name: 'TypeB' } )
+    class TestTypeB { }
+
+    @ObjectDefinition( {
+        name: 'TypeA',
+        description: 'Desc',
+    } )
+    class TestTypeA {
+        @Field( { type: 'Int', description: 'Desc' } ) fieldA: number;
+        @Field( { type: 'String', description: 'Desc', nullable: true } ) fieldB: number;
+        @Field( { type: 'Float', description: 'Desc' } ) fieldC: number[];
+        @Field( { type: TestTypeB, description: 'Desc' } ) fieldD: TestTypeB[];
+    }
+
+    @Schema( {
+        rootQuery: 'TypeA',
+        components: [ TestTypeA, TestTypeB ]
+    } )
+    class TestSchemaA { }
 
     let factoryContext: FactoryContext;
     let graphqlSchema: GraphQLSchema;
