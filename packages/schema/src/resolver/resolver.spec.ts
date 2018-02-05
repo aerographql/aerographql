@@ -6,14 +6,14 @@ import { Resolver, ResolverMetaObject } from './resolver';
 import { resolverConfigFactory } from './resolver-config-factory'
 import { Arg } from '../arg';
 import { FactoryContext } from '../shared';
-import { GraphQLList } from 'graphql';
+import { GraphQLList, GraphQLNonNull } from 'graphql';
 
 @ObjectDefinition( { name: 'TypeA' } ) class TypeC { }
 
 @ObjectImplementation( { name: 'TypeA', description: 'Desc' } )
 class TypeImplA {
     @Resolver( { type: 'TypeA', description: 'Desc', nullable: true } )
-    fieldA( src: any, @Arg() arg1: number, @Arg() arg2: number[] ) { }
+    fieldA( src: any, @Arg() arg1: number, @Arg( { type: 'Int' } ) arg2: number[] ) { }
 }
 
 class UnanotatedType { }
@@ -103,6 +103,7 @@ describe( 'resolverConfigFactory function', () => {
         expect( gql.description ).toBe( 'Desc' );
         expect( gql.args ).toHaveProperty( 'arg1' );
         expect( gql.args ).toHaveProperty( 'arg2' );
-        expect( gql.args.arg2 ).toBeInstanceOf( GraphQLList );
+        expect( gql.args.arg2.type ).toBeInstanceOf( GraphQLNonNull );
+        expect( (gql.args.arg2.type as GraphQLNonNull<any>).ofType ).toBeInstanceOf( GraphQLList );
     } );
 } );
