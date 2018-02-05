@@ -158,6 +158,8 @@ export let createdResolveType = ( name: string, customResolveType: ResolveTypeFu
                     }
                 }
             }
+
+            // If a discriminant field was found, store it for this type name and move to the others types
             if ( isDiscriminant ) {
                 discriminantMap[ typeName ] = fieldName;
                 break;
