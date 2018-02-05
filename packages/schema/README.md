@@ -10,7 +10,7 @@
 
 # AeroGraphQL Schema
 
-Define your [GraphQL schema](http://graphql.org/learn/schema/) using Typesctipt annotations and intergrate seamlessly your [GraphQL resolvers](http://graphql.org/learn/execution/) using those same types, directly in Typescript.
+Define your [GraphQL schema](http://graphql.org/learn/schema/) using Typescript annotations and intergrate seamlessly your [GraphQL resolvers](http://graphql.org/learn/execution/) using those same types, directly in Typescript.
 
 Then plug the GraphQL schema in any GraphQL server you want !
 
