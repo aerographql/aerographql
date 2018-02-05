@@ -10,7 +10,7 @@ class Test1 {
 
 describe( '@Inject decorator', () => {
     it( 'should create the right metadata', () => {
-        let test = new Test1( 28, 25);
+        let test = new Test1( 28, 25 );
         expect( Reflect.getMetadata( META_KEY_TOKEN + 0, test.constructor ) ).toBe( 'token1' );
         expect( Reflect.getMetadata( META_KEY_TOKEN + 1, test.constructor ) ).toBe( 'token2' );
     } );

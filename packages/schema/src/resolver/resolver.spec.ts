@@ -1,119 +1,108 @@
 
 import { getMetaObject } from 'aerographql-core';
 
-import { ObjectImplementation, ObjectImplementationMetaObject, ObjectDefinition } from '../object';
-import { Resolver } from './resolver';
+import { ObjectImplementation, ObjectImplementationMetaObject, ObjectDefinition, objectTypeFactory } from '../object';
+import { Resolver, ResolverMetaObject } from './resolver';
+import { resolverConfigFactory } from './resolver-config-factory'
 import { Arg } from '../arg';
+import { FactoryContext } from '../shared';
+import { GraphQLList } from 'graphql';
 
-@ObjectDefinition( {
-    name: 'TypeA'
-} )
-class TypeA { }
+@ObjectDefinition( { name: 'TypeA' } ) class TypeC { }
 
-@ObjectImplementation( {
-    name: 'TypeA'
-} )
-class TypeImplA { }
+@ObjectImplementation( { name: 'TypeA', description: 'Desc' } )
+class TypeImplA {
+    @Resolver( { type: 'TypeA', description: 'Desc', nullable: true } )
+    fieldA( src: any, @Arg() arg1: number, @Arg() arg2: number[] ) { }
+}
 
-@ObjectImplementation( {
-    name: 'TypeA'
-} )
+class UnanotatedType { }
+
+@ObjectImplementation( { name: 'TypeA' } )
 class TypeImplB {
-
-    @Resolver( { type: 'TypeA', description: 'Desc' } )
-    fieldA( src: any, @Arg() arg1: number ) {
-    }
-}
-
-class UnanotatedType {
-
-}
-
-@ObjectImplementation( {
-    name: 'TypeA'
-} )
-class TypeImplC {
-
-    @Resolver( { type: TypeA } )
-    fieldA( src: any, @Arg() arg1: number ) {
-    }
-
-
-    @Resolver( { type: TypeA, list: true } )
-    fieldB( src: any, @Arg() arg1: number ) {
-    }
-
+    @Resolver( { type: TypeC, description: 'Desc' } ) fieldA( src: any, @Arg() arg1: number ) { }
+    @Resolver( { type: TypeC, list: true } ) fieldB( src: any, @Arg() arg1: number ) { }
 }
 
 describe( '@Resolver decorator', () => {
     it( 'should correctly set description', () => {
-        expect( getMetaObject( TypeImplB ) ).not.toBeNull();
+        expect( getMetaObject( TypeImplA ) ).toBeDefined();
 
-        let md = getMetaObject<ObjectImplementationMetaObject>( TypeImplB );
+        let md = getMetaObject<ObjectImplementationMetaObject>( TypeImplA );
         expect( md.fields ).toHaveProperty( 'fieldA' );
-        expect( md.fields.fieldA.description ).toBe('Desc');
+        expect( md.fields.fieldA.description ).toBe( 'Desc' );
 
-
-        md = getMetaObject<ObjectImplementationMetaObject>( TypeImplC );
+        md = getMetaObject<ObjectImplementationMetaObject>( TypeImplB );
         expect( md.fields ).toHaveProperty( 'fieldA' );
-        expect( md.fields.fieldA.description ).toBeNull();
-    })
-    
-    it( 'should set the correct metadata when using weakly typed type info', () => {
-        expect( getMetaObject( TypeImplB ) ).not.toBeNull();
+        expect( md.fields.fieldA.description ).toBe( 'Desc' );
+    } )
 
-        let md = getMetaObject<ObjectImplementationMetaObject>( TypeImplB );
-        expect( md.name ).toBe( 'TypeA' );
-        expect( md.fields ).toHaveProperty( 'fieldA' );
-        expect( md.fields.fieldA.type ).toBe( 'TypeA' );
-        expect( md.fields.fieldA.list ).toBe( false );
-        expect( md.fields.fieldA.nullable ).toBe( false );
-        expect( md.fields.fieldA.instanceToken ).toBe( 'TypeImplB' );
+    it( 'should set the correct metadata', () => {
+        expect( getMetaObject( TypeImplA ) ).toBeDefined();
+
+        let mo = getMetaObject<ObjectImplementationMetaObject>( TypeImplA );
+        expect( mo.name ).toBe( 'TypeA' );
+        expect( mo.description ).toBe( 'Desc' );
+        expect( mo.fields ).toHaveProperty( 'fieldA' );
+        expect( mo.fields.fieldA.type ).toBe( 'TypeA' );
+        expect( mo.fields.fieldA.list ).toBe( false );
+        expect( mo.fields.fieldA.nullable ).toBe( true );
+        expect( mo.fields.fieldA.instanceToken ).toBe( 'TypeImplA' );
 
     } );
-    it( 'should set the correct metadata when using strongly typed type info', () => {
-        expect( getMetaObject( TypeImplC ) ).not.toBeNull();
 
-        let md = getMetaObject<ObjectImplementationMetaObject>( TypeImplC );
-        expect( md.name ).toBe( 'TypeA' );
-        expect( md.fields ).toHaveProperty( 'fieldA' );
-        expect( md.fields.fieldA.type ).toBe( 'TypeA' );
-        expect( md.fields.fieldA.list ).toBe( false );
-        expect( md.fields.fieldA.nullable ).toBe( false );
-        expect( md.fields.fieldA.instanceToken ).toBe( 'TypeImplC' );
-    } );
-    
     it( 'should correctly determine if returning list', () => {
-        expect( getMetaObject( TypeImplC ) ).not.toBeNull();
+        expect( getMetaObject( TypeImplB ) ).toBeDefined();
 
-        let md = getMetaObject<ObjectImplementationMetaObject>( TypeImplC );
-        expect( md.name ).toBe( 'TypeA' );
-        expect( md.fields ).toHaveProperty( 'fieldB' );
-        expect( md.fields.fieldB.type ).toBe( 'TypeA' );
-        expect( md.fields.fieldB.list ).toBe( true );
-        expect( md.fields.fieldB.instanceToken ).toBe( 'TypeImplC' );
+        let mo = getMetaObject<ObjectImplementationMetaObject>( TypeImplB );
+        expect( mo.name ).toBe( 'TypeA' );
+        expect( mo.fields ).toHaveProperty( 'fieldB' );
+        expect( mo.fields.fieldB.type ).toBe( 'TypeA' );
+        expect( mo.fields.fieldB.list ).toBe( true );
+        expect( mo.fields.fieldB.instanceToken ).toBe( 'TypeImplB' );
     } );
-    
+
     it( 'should throw in invalid configuration', () => {
         expect( () => {
             @ObjectImplementation( { name: 'TypeA' } )
             class Type {
-            
+
                 @Resolver( { type: UnanotatedType } )
-                field() {}
+                field() { }
             }
         } ).toThrowError();
-    })
+    } )
 } );
 
 describe( '@Arg decorator', () => {
     it( 'should set the correct metadata', () => {
-        expect( getMetaObject( TypeImplB ) ).not.toBeNull();
+        expect( getMetaObject( TypeImplA ) ).toBeDefined();
 
-        let md = getMetaObject<ObjectImplementationMetaObject>( TypeImplB );
+        let md = getMetaObject<ObjectImplementationMetaObject>( TypeImplA );
         expect( md.fields.fieldA.args ).toHaveProperty( 'arg1' );
         expect( md.fields.fieldA.args.arg1.index ).toBe( 1 );
         expect( md.fields.fieldA.args.arg1.nullable ).toBe( false );
         expect( md.fields.fieldA.args.arg1.type ).toBe( 'Int' );
+    } );
+} );
+
+describe( 'resolverConfigFactory function', () => {
+
+    let context: FactoryContext;
+    beforeEach( () => {
+        context = new FactoryContext();
+        objectTypeFactory( [], [ TypeImplA ], context );
+    } )
+
+    it( 'should correclt create GrapgQL config', () => {
+        let mo = getMetaObject<ObjectImplementationMetaObject>( TypeImplA );
+        let fmo = mo.fields.fieldA;
+
+        let gql = resolverConfigFactory( fmo, 'fieldA', context );
+        expect( gql.type ).toBe( context.lookupType( getMetaObject( TypeImplA ).name ) );
+        expect( gql.description ).toBe( 'Desc' );
+        expect( gql.args ).toHaveProperty( 'arg1' );
+        expect( gql.args ).toHaveProperty( 'arg2' );
+        expect( gql.args.arg2 ).toBeInstanceOf( GraphQLList );
     } );
 } );

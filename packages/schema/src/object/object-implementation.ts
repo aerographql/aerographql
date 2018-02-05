@@ -24,12 +24,9 @@ export function ObjectImplementation( config: ObjectImplementationConfig = {} ) 
         let name = ctr.name;
         if ( config.name ) name = config.name;
 
-        let implementInterfaces: string[] = [];
+        let implementInterfaces: Function[] = [];
         if ( config.implements )
-            implementInterfaces = config.implements.map( interfaceCtr => {
-                let interfaceMd: InterfaceMetaObject = Reflect.getMetadata( META_KEY_METAOBJECT, interfaceCtr );
-                return interfaceMd.name;
-            } );
+            implementInterfaces = config.implements;
 
         // Extract middleware defined at the type level 
         let typeMiddlewares: ResolverMiddlewareMetaObject[] = [];
@@ -91,5 +88,5 @@ export interface ObjectImplementationMetaObject {
     name: string;
     fields: ResolverMetaObjectMap;
     description: string;
-    implements: string[];
+    implements: Function[];
 }

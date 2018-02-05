@@ -16,21 +16,16 @@ export function ObjectDefinition( config: ObjectDefinitionConfig = {} ) {
     return function ( ctr: Function ) {
 
         let fields = ensureMetadata<FieldMetaObjectMap>( META_KEY_FIELDS_MAP, ctr, {} );
-        let implementInterfaces: string[] = [];
-
+        
         let desc = null;
         if ( config.description ) desc = config.description;
-
+        
         let name = ctr.name;
         if ( config.name ) name = config.name;
-
+        
+        let implementInterfaces: Function[] = [];
         if ( config.implements )
-            implementInterfaces = config.implements.map( interfaceCtr => {
-                let interfaceMd: InterfaceMetaObject = Reflect.getMetadata( META_KEY_METAOBJECT, interfaceCtr );
-                return interfaceMd.name;
-            } );
-
-        if ( !fields ) fields = {};
+            implementInterfaces = config.implements;
 
         let md: ObjectDefinitionMetaObject = {
             name: name,
@@ -54,6 +49,6 @@ export interface ObjectDefinitionMetaObject {
     name: string;
     description: string;
     fields: FieldMetaObjectMap;
-    implements: string[];
+    implements: Function[];
 }
 

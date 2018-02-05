@@ -35,11 +35,7 @@ describe( '@Scalar decorator', () => {
 
 describe( 'scalarFactory', () => {
 
-    @Scalar( {
-        name: 'Name'
-    } )
-    class InvalidScalarA {
-    }
+    @Scalar( { name: 'Name' } ) class InvalidScalarA { }
 
     let injector = Injector.resolveAndCreate( [ ScalarA, InvalidScalarA ] );
     let context: FactoryContext;

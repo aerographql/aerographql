@@ -18,122 +18,34 @@ import { Arg } from '../arg';
 import { Middleware, FactoryContext } from '../shared';
 import { objectTypeFactory } from './object-factory';
 import { Schema, BaseSchema } from '../schema';
+import { Interface, interfaceFactory } from '../interface';
 
 
-let callIndex = 0;
+describe( '@ObjectDefinition decorator', () => {
 
-@Middleware()
-class MiddlewareA {
-    execute() {
-        ( this as any )[ 'execute' ].callIndex = callIndex++;
-        return 'MiddlewareAReturn';
+    @ObjectDefinition( { name: 'TypeA', description: 'Desc' } ) class TypeA { }
+
+    @ObjectDefinition()
+    class TypeB {
+        @Field( { type: 'Int' } ) fieldA: number;
+        @Field( { type: 'Float' } ) fieldB: number[];
     }
-}
-
-@Middleware()
-class MiddlewareB {
-    execute() {
-        ( this as any )[ 'execute' ].callIndex = callIndex++;
-        return Promise.resolve( 'MiddlewareBReturn' );
-    }
-}
-
-@Middleware()
-class MiddlewareC {
-    execute( source: any, args: any ) {
-        ( this as any )[ 'execute' ].callIndex = callIndex++;
-
-        if ( args.input.errored )
-            return false;
-
-        return true;
-    }
-}
-
-@InputObject( { name: 'InputA', description: 'Desc', } )
-class InputA {
-    @Field( { type: 'Boolean', description: 'Desc' } )
-    errored: boolean;
-}
-
-@ObjectDefinition( { name: 'TypeA', description: 'Desc' } )
-class TypeA {
-
-}
-
-@ObjectDefinition()
-class TypeB {
-    @Field( { type: 'Int' } )
-    fieldA: number;
-
-    @Field( { type: 'Float' } )
-    fieldB: number[];
-}
-
-
-@ObjectImplementation( { name: 'TypeA', middlewares: [ MiddlewareA, MiddlewareB ] } )
-class TypeImplA {
-
-    @Resolver( {
-        type: 'Int',
-        middlewares: [ MiddlewareC, { provider: MiddlewareB, options: 'MwOptions' } ]
-    } )
-    resolverA( @Arg() input: InputA ) {
-        return 'ResolverAReturn';
-    }
-
-    @Resolver( {
-        type: 'Int'
-    } )
-    resolverB( @Arg() input: InputA ) {
-        return 'ResolverBReturn';
-    }
-
-    @Resolver( {
-        type: 'Int'
-    } )
-    resolverC( source: any, @Arg() input: InputA, context: any ) {
-        return 'ResolverCReturn';
-    }
-}
-
-@ObjectImplementation( {
-    name: 'TypeB'
-} )
-class TypeImplB1 {
-
-    @Resolver( { type: 'TypeA' } )
-    resolverA( src: any, @Arg() arg1: number ) {
-    }
-}
-
-@ObjectImplementation( {
-    name: 'TypeB'
-} )
-class TypeImplB2 {
-
-    @Resolver( { type: 'TypeA' } )
-    resolverB( src: any, @Arg() arg1: number ) {
-    }
-}
-
-describe( '@TypeDefinition decorator', () => {
 
     it( 'should set the correct metadata', () => {
         expect( getMetaObject( TypeA ) ).not.toBeNull();
 
-        let md = getMetaObject<ObjectDefinitionMetaObject>( TypeA );
-        expect( md.name ).toBe( 'TypeA' );
-        expect( md.fields ).toEqual( {} );
-        expect( md.implements ).toHaveLength( 0 );
+        let mo = getMetaObject<ObjectDefinitionMetaObject>( TypeA );
+        expect( mo.name ).toBe( 'TypeA' );
+        expect( mo.fields ).toEqual( {} );
+        expect( mo.implements ).toHaveLength( 0 );
     } );
     it( 'should set the correct default name when not specified', () => {
         expect( getMetaObject( TypeB ) ).not.toBeNull();
 
-        let md = getMetaObject<ObjectDefinitionMetaObject>( TypeB );
-        expect( md.name ).toBe( 'TypeB' );
-        expect( md.description ).toBeNull();
-        expect( md.implements ).toHaveLength( 0 );
+        let mo = getMetaObject<ObjectDefinitionMetaObject>( TypeB );
+        expect( mo.name ).toBe( 'TypeB' );
+        expect( mo.description ).toBeNull();
+        expect( mo.implements ).toHaveLength( 0 );
     } );
     it( 'should set the correct fields metadata', () => {
         expect( getMetaObject( TypeB ) ).not.toBeNull();
@@ -153,16 +65,27 @@ describe( '@TypeDefinition decorator', () => {
     } );
 } );
 
-describe( '@TypeImplementation decorator', () => {
-    it( 'should set the correct metadata when using weakly typed type info', () => {
-        expect( getMetaObject( TypeImplA ) ).not.toBeNull();
-        let md = getMetaObject<ObjectImplementationMetaObject>( TypeImplA );
-        expect( md.name ).toBe( 'TypeA' );
+describe( '@ObjectImplementation decorator', () => {
+
+    @Interface( { name: 'IA' } ) class IA { }
+    @Interface( { name: 'IB' } ) class IB { }
+    @ObjectImplementation( { name: 'TypeA', description: 'Desc', implements: [ IA, IB ] } )
+    class TypeImplA { }
+    @ObjectImplementation( { name: 'TypeB' } )
+    class TypeImplB { }
+
+    it( 'should set the correct metadata ', () => {
+        expect( getMetaObject( TypeImplA ) ).toBeDefined();
+        let mo = getMetaObject<ObjectImplementationMetaObject>( TypeImplA );
+        expect( mo.name ).toBe( 'TypeA' );
+        expect( mo.description ).toBe( 'Desc' );
+        expect( mo.implements ).toHaveLength( 2 );
     } );
-    it( 'should set the correct metadata when using strongly typed type info', () => {
-        expect( getMetaObject( TypeImplB1 ) ).not.toBeNull();
-        let md = getMetaObject<ObjectImplementationMetaObject>( TypeImplB1 );
-        expect( md.name ).toBe( 'TypeB' );
+    it( 'should correctly handle empty implements array', () => {
+        expect( getMetaObject( TypeImplB ) ).toBeDefined();
+        let mo = getMetaObject<ObjectImplementationMetaObject>( TypeImplB );
+        expect( mo.name ).toBe( 'TypeB' );
+        expect( mo.implements ).toHaveLength( 0 );
     } );
     it( 'should set the correct type', () => {
         expect( getMetaObjectType( TypeImplA ) ).toBe( METAOBJECT_TYPES.objectImplementation );
@@ -170,6 +93,14 @@ describe( '@TypeImplementation decorator', () => {
 } );
 
 describe( '@Arg decorator', () => {
+    @ObjectImplementation( {
+        name: 'TypeB'
+    } )
+    class TypeImplB1 {
+        @Resolver( { type: 'TypeA' } )
+        resolverA( src: any, @Arg() arg1: number ) { }
+    }
+
     it( 'should set the correct metadata', () => {
         expect( getMetaObject( TypeImplB1 ) ).not.toBeNull();
 
@@ -181,8 +112,70 @@ describe( '@Arg decorator', () => {
     } );
 } );
 
-describe( 'typeFactory', () => {
-    let factoryContext: FactoryContext;
+describe( 'objectTypeFactory function', () => {
+
+    let callIndex = 0;
+
+    @Interface() class IA { }
+    @Interface() class IB { }
+
+    @Middleware()
+    class MA {
+        execute() {
+            ( this as any )[ 'execute' ].callIndex = callIndex++;
+            return 'MiddlewareAReturn';
+        }
+    }
+
+    @Middleware()
+    class MB {
+        execute() {
+            ( this as any )[ 'execute' ].callIndex = callIndex++;
+            return Promise.resolve( 'MiddlewareBReturn' );
+        }
+    }
+
+    @Middleware()
+    class MC {
+        execute( source: any, args: any ) {
+            ( this as any )[ 'execute' ].callIndex = callIndex++;
+            return !args.input.errored;
+        }
+    }
+
+    @InputObject( { name: 'InputA', description: 'Desc', } )
+    class InputA {
+        @Field( { type: 'Boolean', description: 'Desc' } ) errored: boolean;
+    }
+
+    @ObjectDefinition( { name: 'TypeA', description: 'Desc', implements: [ IA ] } )
+    class TypeA { }
+
+    @ObjectDefinition()
+    class TypeB {
+        @Field( { type: 'Int' } ) fieldA: number;
+        @Field( { type: 'Float' } ) fieldB: number[];
+    }
+
+    @ObjectImplementation( { name: 'TypeA', middlewares: [ MA, MB ], implements: [ IB ] } )
+    class TypeImplA {
+
+        @Resolver( {
+            type: 'Int',
+            middlewares: [ MC, { provider: MB, options: 'MwOptions' } ]
+        } )
+        resolverA( @Arg() input: InputA ) { return 'ResolverAReturn'; }
+
+        @Resolver( { type: 'Int' } )
+        resolverB( @Arg() input: InputA ) { return 'ResolverBReturn'; }
+
+        @Resolver( { type: 'Int' } )
+        resolverC( source: any, @Arg() input: InputA, context: any ) {
+            return 'ResolverCReturn';
+        }
+    }
+
+    let context: FactoryContext;
     let typeA: GraphQLObjectType;
     let typeB: GraphQLObjectType;
     let inputA: GraphQLInputObjectType;
@@ -190,19 +183,21 @@ describe( 'typeFactory', () => {
 
     beforeEach( () => {
         injector = TestBed.configure( {
-            providers: [ TypeImplA, MiddlewareA, MiddlewareB, MiddlewareC ]
+            providers: [ TypeImplA, MA, MB, MC ]
         } );
-        factoryContext = new FactoryContext( injector );
+        context = new FactoryContext( injector );
 
-        inputA = inputFactory( InputA, factoryContext );
-        typeA = objectTypeFactory( [ TypeA ], [ TypeImplA ], factoryContext );
-        typeB = objectTypeFactory( [ TypeB ], [ TypeImplB1 ], factoryContext );
+        interfaceFactory( IA, context );
+        interfaceFactory( IB, context );
+        inputA = inputFactory( InputA, context );
+        typeA = objectTypeFactory( [ TypeA ], [ TypeImplA ], context );
+        typeB = objectTypeFactory( [ TypeB ], [], context );
     } );
 
     describe( 'with a type definition', () => {
 
         it( 'should create the correct type', () => {
-            expect( typeA ).not.toBeUndefined();
+            expect( typeA ).toBeDefined();
             expect( typeA.description ).toEqual( 'Desc' );
             expect( typeA ).toBeInstanceOf( GraphQLObjectType );
         } );
@@ -210,7 +205,7 @@ describe( 'typeFactory', () => {
         it( 'should create the correct fields ', () => {
 
             let fieldA = typeB.getFields().fieldA;
-            expect( fieldA ).not.toBeUndefined();
+            expect( fieldA ).toBeDefined();
             expect( fieldA.name ).toBe( 'fieldA' );
             expect( fieldA.description ).toBeUndefined();
 
@@ -229,12 +224,12 @@ describe( 'typeFactory', () => {
 
     describe( 'with a type implementation', () => {
         it( 'should create the correct resolvers and arguments type', () => {
-            expect( typeA ).not.toBeUndefined();
+            expect( typeA ).toBeDefined();
             expect( typeA.description ).toEqual( 'Desc' );
             expect( typeA ).toBeInstanceOf( GraphQLObjectType );
 
             let resovlerA = typeA.getFields().resolverA;
-            expect( resovlerA ).not.toBeUndefined();
+            expect( resovlerA ).toBeDefined();
             expect( resovlerA.name ).toBe( 'resolverA' );
             expect( resovlerA.args ).toHaveLength( 1 );
             let argA = resovlerA.args[ 0 ];
@@ -250,15 +245,23 @@ describe( 'typeFactory', () => {
 
     describe( 'with multiple type implementations', () => {
         it( 'should create the correct resolvers and arguments type', () => {
-            expect( typeB ).not.toBeUndefined();
+            expect( typeB ).toBeDefined();
             let resovlerA = typeA.getFields().resolverA;
-            expect( resovlerA ).not.toBeUndefined();
+            expect( resovlerA ).toBeDefined();
             expect( resovlerA.name ).toBe( 'resolverA' );
             expect( resovlerA.args ).toHaveLength( 1 );
             let resovlerB = typeA.getFields().resolverB;
-            expect( resovlerB ).not.toBeUndefined();
+            expect( resovlerB ).toBeDefined();
             expect( resovlerB.name ).toBe( 'resolverB' );
             expect( resovlerB.args ).toHaveLength( 1 );
+        } )
+    } );
+
+    describe( 'with borh definition and implementation', () => {
+        it( 'should create the correct interfaces array', () => {
+            let interfaces = typeA.getInterfaces();
+            expect( interfaces ).toContain( context.lookupType( getMetaObject( IA ).name ) );
+            expect( interfaces ).toContain( context.lookupType( getMetaObject( IB ).name ) );
         } )
     } );
 
@@ -274,8 +277,8 @@ describe( 'typeFactory', () => {
         } );
 
         it( 'should call the middlwares with the correct parameters and in the correct order', () => {
-            let spy1 = jest.spyOn( injector.get( MiddlewareC ), 'execute' );
-            let spy2 = jest.spyOn( injector.get( MiddlewareB ), 'execute' );
+            let spy1 = jest.spyOn( injector.get( MC ), 'execute' );
+            let spy2 = jest.spyOn( injector.get( MB ), 'execute' );
 
             // Fake call on the resolver (this is done by the graphql runtime)
             let source = {}
@@ -291,8 +294,8 @@ describe( 'typeFactory', () => {
         } );
 
         it( 'should stop on middleware error', () => {
-            let spy1 = jest.spyOn( injector.get( MiddlewareC ), 'execute' );
-            let spy2 = jest.spyOn( injector.get( MiddlewareB ), 'execute' );
+            let spy1 = jest.spyOn( injector.get( MC ), 'execute' );
+            let spy2 = jest.spyOn( injector.get( MB ), 'execute' );
             let spy3 = jest.spyOn( injector.get( TypeImplA ), 'resolverA' );
 
             // Fake call on the resolver (this is done by the graphql runtime)

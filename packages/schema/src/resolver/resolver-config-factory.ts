@@ -5,43 +5,43 @@ import { ObjectDefinitionMetaObject } from '../object';
 import { ResolverMetaObject } from './resolver';
 import { Context, FactoryContext, MiddlewareError, MiddlewareSignature, BaseMiddleware } from '../shared';
 
-export let resolverConfigFactory = function ( impl: ResolverMetaObject, fieldName: string, factoryContext: FactoryContext ) {
+export let resolverConfigFactory = function ( metaObject: ResolverMetaObject, fieldName: string, factoryContext: FactoryContext ) {
     let fieldConfig: GraphQLFieldConfig<any, any> = {
         type: null
     };
 
-    if ( impl.description )
-        fieldConfig.description = impl.description;
+    if ( metaObject.description )
+        fieldConfig.description = metaObject.description;
 
     // Setup the type of the field
     // Assert the type of this field exist
-    if ( !factoryContext.isValidType( impl.type ) ) {
-        throw new Error( `Type "${impl.type}" for field "${fieldName}" is not valid` )
+    if ( !factoryContext.isValidType( metaObject.type ) ) {
+        throw new Error( `Type "${metaObject.type}" for field "${fieldName}" is not valid` )
     }
     // Build the type
-    let type = factoryContext.lookupType( impl.type );
-    if ( impl.list )
+    let type = factoryContext.lookupType( metaObject.type );
+    if ( metaObject.list )
         type = new GraphQLList<any>( type );
-    if ( !impl.nullable )
+    if ( !metaObject.nullable )
         type = new GraphQLNonNull<any>( type );
 
     fieldConfig.type = type;
 
     // Setup the arguments for this fields if any
     fieldConfig.args = {};
-    for ( let key in impl.args ) {
+    for ( let key in metaObject.args ) {
 
         // Assert that the argument type exist
-        if ( !factoryContext.isValidType( impl.args[ key ].type ) ) {
-            throw new Error( `Type "${impl.args[ key ].type}" used by parameter "${key}" in field "${fieldName}" is not valid` );
+        if ( !factoryContext.isValidType( metaObject.args[ key ].type ) ) {
+            throw new Error( `Type "${metaObject.args[ key ].type}" used by parameter "${key}" in field "${fieldName}" is not valid` );
         }
         // Build the type
-        let argType = factoryContext.lookupType( impl.args[ key ].type );
+        let argType = factoryContext.lookupType( metaObject.args[ key ].type );
 
-        if ( impl.args[ key ].list )
+        if ( metaObject.args[ key ].list )
             argType = new GraphQLList<any>( argType );
 
-        if ( !impl.args[ key ].nullable )
+        if ( !metaObject.args[ key ].nullable )
             argType = new GraphQLNonNull<any>( argType );
 
         fieldConfig.args[ key ] = {
@@ -61,7 +61,7 @@ export let resolverConfigFactory = function ( impl: ResolverMetaObject, fieldNam
         if ( !context.middlewareOptions ) context.middlewareOptions = null;
         if ( !context.middlewareResults ) context.middlewareResults = [];
 
-        impl.middlewares.forEach( mwInfo => {
+        metaObject.middlewares.forEach( mwInfo => {
             let mwInstance: BaseMiddleware = factoryContext.injector.get( mwInfo.provider, null );
             if ( !mwInstance ) {
                 throw new Error( `Unable to find instance at token "${mwInfo.provider}" for middleware` );
@@ -108,9 +108,9 @@ export let resolverConfigFactory = function ( impl: ResolverMetaObject, fieldNam
 
 
         // Grab the instane of the implementation from the dependecy injection system
-        let instance = factoryContext.injector.get( impl.instanceToken, null );
+        let instance = factoryContext.injector.get( metaObject.instanceToken, null );
         if ( !instance ) {
-            throw new Error( `Unable to find instance at token "${impl.instanceToken}" for resolver` );
+            throw new Error( `Unable to find instance at token "${metaObject.instanceToken}" for resolver` );
         }
 
         // Grab the resolve function itself
@@ -122,8 +122,8 @@ export let resolverConfigFactory = function ( impl: ResolverMetaObject, fieldNam
         // For each graphql arguments, insert them in an array with the same order 
         // as they appear in the implemention field's reseolver
         let expandedArgs: any[] = [ undefined ];
-        for ( let key in impl.args ) {
-            let arg = impl.args[ key ];
+        for ( let key in metaObject.args ) {
+            let arg = metaObject.args[ key ];
             expandedArgs[ arg.index ] = args[ key ];
         }
 

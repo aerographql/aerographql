@@ -6,6 +6,7 @@ import { FieldMetaObject } from '../field';
 import { ResolverMetaObject, resolverConfigFactory } from '../resolver';
 import { ObjectDefinitionMetaObject } from './object-definition';
 import { FactoryContext } from '../shared';
+import { InterfaceMetaObject } from '../interface';
 import { fieldConfigFactory } from '../field';
 
 
@@ -77,19 +78,21 @@ export let objectTypeFactory = function ( defsCtr: Function[], implsCtr: Functio
         // Create a map of every interface implemented by this type
         let interfaces = defs.reduce( ( acc: any[], def ) => {
             acc = acc.concat( def.implements.map( i => {
-                if ( !context.isValidType( i ) ) {
-                    throw new Error( `Type "${def.name}" implements an interface that does not exist "${i}"` );
+                let interfaceName = getMetaObject<InterfaceMetaObject>( i, METAOBJECT_TYPES.interface ).name;
+                if ( !context.isValidType(interfaceName ) ) {
+                    throw new Error( `Type "${def.name}" implements an interface that does not exist "${interfaceName}"` );
                 }
-                return context.lookupType( i )
+                return context.lookupType( interfaceName )
             } ) );
             return acc;
         }, [] );
         interfaces = impls.reduce( ( acc: any[], impl ) => {
             acc = acc.concat( impl.implements.map( i => {
-                if ( !context.isValidType( i ) ) {
-                    throw new Error( `Type "${impl.name}" implements an interface that does not exist "${i}"` );
+                let interfaceName = getMetaObject<InterfaceMetaObject>( i, METAOBJECT_TYPES.interface ).name;
+                if ( !context.isValidType( interfaceName ) ) {
+                    throw new Error( `Type "${impl.name}" implements an interface that does not exist "${interfaceName}"` );
                 }
-                return context.lookupType( i )
+                return context.lookupType( interfaceName )
             } ) );
             return acc;
         }, interfaces );

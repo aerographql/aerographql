@@ -1,2 +1,2 @@
 export * from './resolver';
-export * from './resolver-factory';
+export * from './resolver-config-factory';
