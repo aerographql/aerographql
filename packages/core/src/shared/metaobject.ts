@@ -16,6 +16,7 @@ export enum METAOBJECT_TYPES {
     objectDefinition = 'ObjectDefinition',
     objectImplementation = 'ObjectImplementation',
     schema = 'Schema',
+    union = 'Union',
     middleware = 'Middleware',
     notAnnotated = 'NotAnnotated'
 }
@@ -34,8 +35,9 @@ export function getMetaObject<T = MetaObject>( target: any, type: METAOBJECT_TYP
         }
     }
 
-    if ( Reflect.hasMetadata( META_KEY_METAOBJECT, target ) )
+    if ( target && Reflect.hasMetadata( META_KEY_METAOBJECT, target ) )
         return Reflect.getMetadata( META_KEY_METAOBJECT, target ) as T;
+        
     return null;
 }
 
