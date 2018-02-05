@@ -28,7 +28,7 @@ export let unionFactory = function ( ctr: Function, context: FactoryContext ) {
         );
     }
 
-    conf.resolveType = createdResolveType( metaObject.resolveType, metaObject.types );
+    conf.resolveType = createdResolveType( conf.name, metaObject.resolveType, metaObject.types );
 
     let o = new GraphQLUnionType( conf );
     context.unionMap.set( conf.name, o );

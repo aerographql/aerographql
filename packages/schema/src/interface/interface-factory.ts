@@ -26,7 +26,7 @@ export let interfaceFactory = function ( ctr: Function, context: FactoryContext 
         return fields;
     };
 
-    conf.resolveType = createdResolveType( metaObject.resolveType, metaObject.implementers );
+    conf.resolveType = createdResolveType( conf.name, metaObject.resolveType, metaObject.implementers );
 
     let o = new GraphQLInterfaceType( conf );
     context.interfaceMap.set( conf.name, o );

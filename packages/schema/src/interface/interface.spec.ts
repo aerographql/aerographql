@@ -11,82 +11,48 @@ import { Schema, BaseSchema } from '../schema';
 import { FactoryContext } from '../shared';
 import { Field } from '../field';
 
-@Interface( {
-    name: 'TestInterface',
-    description: 'Desc',
-} )
-class TestInterface {
-    @Field( { type: 'Int' } ) fieldA: number;
-    @Field( { type: 'String' } ) fieldB: string;
-}
-
-@ObjectDefinition( {
-    name: 'TestType1',
-    implements: [ TestInterface ]
-} )
-class TestType1 {
-    @Field( { type: 'Int' } ) fieldA: number = 0;
-    @Field() fieldB: string = "String";
-    @Field() fieldC: string = "String";
-}
-
-@ObjectDefinition( {
-    name: 'TestType2',
-    implements: [ TestInterface ]
-} )
-class TestType2 {
-    @Field( { type: 'Int' } ) fieldA: number = 0;
-    @Field() fieldB: string = "String";
-    @Field() fieldD: number = 1;
-}
-
-@ObjectImplementation( { name: 'TestRootQuery' } )
-class TestRootQuery {
-    static spy: jest.Mock;
-    @Resolver( { type: TestInterface } )
-    query1( parent: any, context: any ) {
-        TestRootQuery.spy( context );
-        return {
-            fieldA: 0,
-            fieldB: 'String',
-            fieldC: 'String'
-        };
-    }
-
-    @Resolver( { type: TestInterface } )
-    query2( parent: any, context: any ) {
-        TestRootQuery.spy( context );
-        return new TestType2();
-    }
-}
-@Schema( { rootQuery: 'TestRootQuery', components: [ TestRootQuery, TestInterface, TestType1, TestType2 ] } )
-class TestSchema extends BaseSchema {
-}
-
 
 describe( '@InterfaceDefinition decorator', () => {
 
-    let interfaceAMetadata: InterfaceMetaObject;
+    @Interface( {
+        name: 'InterfaceA',
+        description: 'Desc',
+    } )
+    class InterfaceA {
+        @Field( { type: 'Int' } ) fieldA: number;
+        @Field( { type: 'String' } ) fieldB: string;
+    }
+
+    let mo: InterfaceMetaObject;
     beforeEach( () => {
-        interfaceAMetadata = getMetaObject<InterfaceMetaObject>( TestInterface );
+        mo = getMetaObject<InterfaceMetaObject>( InterfaceA );
     } );
 
     it( 'should set the correct metadata', () => {
-        expect( interfaceAMetadata ).not.toBeNull();
-        expect( interfaceAMetadata.name ).toBe( 'TestInterface' );
-        expect( interfaceAMetadata.description ).toBe( 'Desc' );
+        expect( mo ).not.toBeNull();
+        expect( mo.name ).toBe( 'InterfaceA' );
+        expect( mo.description ).toBe( 'Desc' );
     } );
     it( 'should set the correct type', () => {
-        expect( getMetaObjectType( TestInterface ) ).toBe( METAOBJECT_TYPES.interface );
+        expect( getMetaObjectType( InterfaceA ) ).toBe( METAOBJECT_TYPES.interface );
     } );
     it( 'should set the correct fields', () => {
-        expect( interfaceAMetadata.fields ).toHaveProperty( 'fieldA' );
-        expect( interfaceAMetadata.fields ).toHaveProperty( 'fieldB' );
+        expect( mo.fields ).toHaveProperty( 'fieldA' );
+        expect( mo.fields ).toHaveProperty( 'fieldB' );
     } );
 
 } );
 
 describe( 'interfaceFactory function', () => {
+
+    @Interface( {
+        name: 'InterfaceA',
+        description: 'Desc',
+    } )
+    class InterfaceA {
+        @Field( { type: 'Int' } ) fieldA: number;
+        @Field( { type: 'String' } ) fieldB: string;
+    }
 
     let factoryContext: FactoryContext;
     beforeEach( () => {
@@ -94,19 +60,92 @@ describe( 'interfaceFactory function', () => {
     } )
 
     it( 'should create the correct graphql object', () => {
-        let gql = interfaceFactory( TestInterface, factoryContext );
+        let gql = interfaceFactory( InterfaceA, factoryContext );
         expect( gql ).not.toBeFalsy();
-        expect( gql.name ).toBe( 'TestInterface' );
+        expect( gql.name ).toBe( 'InterfaceA' );
         expect( gql.description ).toBe( 'Desc' );
     } );
     it( 'should create the correct graphql object fields', () => {
-        let gql = interfaceFactory( TestInterface, factoryContext );
+        let gql = interfaceFactory( InterfaceA, factoryContext );
         expect( gql ).not.toBeFalsy();
         expect( gql.getFields().fieldA ).toBeTruthy();
     } );
 } );
 
 describe( 'When used from an express middleware, Interface', () => {
+
+    @Interface( { name: 'InterfaceA', description: 'Desc', } )
+    class InterfaceA {
+        @Field( { type: 'Int' } ) fieldA: number;
+        @Field( { type: 'String' } ) fieldB: string;
+    }
+
+    @ObjectDefinition( { name: 'TestType1', implements: [ InterfaceA ] } )
+    class TypeA {
+        @Field( { type: 'Int' } ) fieldA: number = 0;
+        @Field() fieldB: string = "String";
+        @Field() fieldC: string = "String";
+    }
+
+    @ObjectDefinition( { name: 'TestType2', implements: [ InterfaceA ] } )
+    class TypeB {
+        @Field( { type: 'Int' } ) fieldA: number = 0;
+        @Field() fieldB: string = "String";
+        @Field() fieldD: number = 1;
+    }
+
+
+    @Interface( )
+    class InterfaceB {
+        @Field( ) fieldA: number;
+        @Field( ) fieldB: string;
+    }
+
+    @ObjectDefinition( { implements: [ InterfaceB ] } )
+    class TypeC {
+        @Field( ) fieldA: number = 0;
+        @Field( ) fieldB: string = '';
+    }
+
+    @ObjectDefinition( { implements: [ InterfaceB ] } )
+    class TypeD {
+        @Field( ) fieldA: number = 0;
+        @Field( ) fieldB: string = '';
+    }
+
+    @ObjectImplementation( { name: 'RootQuery' } )
+    class RootQuery {
+        static spy: jest.Mock;
+        @Resolver( { type: InterfaceA } )
+        query1( parent: any, context: any ) {
+            RootQuery.spy( context );
+            return {
+                fieldA: 0,
+                fieldB: 'String',
+                fieldC: 'String'
+            };
+        }
+
+        @Resolver( { type: InterfaceA } )
+        query2( parent: any, context: any ) {
+            RootQuery.spy( context );
+            return new TypeB();
+        }
+
+        @Resolver( { type: InterfaceB } )
+        query3( parent: any, context: any ) {
+            RootQuery.spy( context );
+            return {
+                fieldA: 0,
+                fieldB: ''
+            };
+        }
+    }
+    @Schema( { rootQuery: 'RootQuery', components: [ RootQuery, InterfaceA, TypeA, TypeB, InterfaceB, TypeC, TypeD ] } )
+    class TestSchema extends BaseSchema {
+    }
+
+
     let response: httpMocks.MockResponse;
     let schema: TestSchema;
     let middleware: ExpressHandler;
@@ -114,7 +153,7 @@ describe( 'When used from an express middleware, Interface', () => {
     beforeEach( () => {
         schema = new TestSchema();
         response = httpMocks.createResponse( { eventEmitter: EventEmitter } );
-        TestRootQuery.spy = jest.fn();
+        RootQuery.spy = jest.fn();
         middleware = graphqlExpress( { schema: schema.graphQLSchema } );
     } )
 
@@ -122,8 +161,7 @@ describe( 'When used from an express middleware, Interface', () => {
         let request = httpMocks.createRequest( {
             method: 'POST',
             body: {
-                query: `{ 
-                    query1 { fieldA fieldB ... on TestType1 { fieldC } } }` }
+                query: `{ query1 { fieldA fieldB ... on TestType1 { fieldC } } }` }
         } );
 
         middleware( request, response, null );
@@ -139,14 +177,30 @@ describe( 'When used from an express middleware, Interface', () => {
         let request = httpMocks.createRequest( {
             method: 'POST',
             body: {
-                query: `{ 
-                    query2 { fieldA fieldB ... on TestType2 { fieldD } } }` }
+                query: `{ query2 { fieldA fieldB ... on TestType2 { fieldD } } }` }
         } );
 
         middleware( request, response, null );
         response.on( 'end', () => {
             var gqlResponse = JSON.parse( response._getData() );
             expect( gqlResponse.data.query2 ).toEqual( { fieldA: 0, fieldB: "String", fieldD: 1 } );
+            expect( response.statusCode ).toBe( 200 );
+            done();
+        } );
+    } )
+
+    it( 'should error when type resolution is not possible', ( done ) => {
+        let request = httpMocks.createRequest( {
+            method: 'POST',
+            body: {
+                query: `{ query3 { fieldA fieldB } }` }
+        } );
+
+        middleware( request, response, null );
+        response.on( 'end', () => {
+            var gqlResponse = JSON.parse( response._getData() );
+            expect( gqlResponse.data ).toBeNull();
+            expect( gqlResponse.errors ).toHaveLength( 1 );
             expect( response.statusCode ).toBe( 200 );
             done();
         } );
