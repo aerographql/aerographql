@@ -1,7 +1,7 @@
 {
     "name": "aerographql-schema",
     "description": " Define your GraphQL schema using Typescript annotations and intergrate seamlessly your GraphQL resolvers using those same types, directly in Typescript.",
-    "version": "0.0.13",
+    "version": "0.0.14",
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
     "license": "MIT",
