@@ -1,7 +1,7 @@
 import 'reflect-metadata';
 import {
     META_KEY_METAOBJECT, META_KEY_METAOBJECT_TYPE, getMetaObjectType,
-    getMetaObject, METAOBJECT_TYPES, isOfMetaObjectType, deduplicateArray
+    getMetaObject, METAOBJECT_TYPES, isOfMetaObjectType, deduplicateArray, Provider
 } from 'aerographql-core';
 import { ObjectDefinitionMetaObject, ObjectImplementationMetaObject } from '../object';
 import { InterfaceMetaObject } from '../interface';
@@ -59,7 +59,7 @@ export function getSchemaProviders( schema: Function ) {
 
     let components = classifyComponents( schemaMetaObject.components );
 
-    let providers: Set<Function> = new Set();
+    let providers: Set<Function | Provider> = new Set();
 
     // Add each implementation as a provider
     if ( components.objectImplementations )
@@ -107,7 +107,7 @@ export function Schema( config: SchemaConfig ) {
             md.providers = deduplicateArray( config.providers );
         }
 
-        md.components = deduplicateArray(  config.components );
+        md.components = deduplicateArray( config.components );
 
         Reflect.defineMetadata( META_KEY_METAOBJECT, md, ctr );
         Reflect.defineMetadata( META_KEY_METAOBJECT_TYPE, METAOBJECT_TYPES.schema, ctr );
@@ -116,7 +116,7 @@ export function Schema( config: SchemaConfig ) {
 export interface SchemaConfig {
     rootQuery: string,
     rootMutation?: string,
-    providers?: Function[],
+    providers?: ( Function | Provider )[],
     components: Function[]
 }
 
@@ -124,5 +124,5 @@ export interface SchemaMetaObject {
     rootQuery: string,
     rootMutation: string,
     components: Function[],
-    providers: Function[]
+    providers: ( Function | Provider )[]
 }

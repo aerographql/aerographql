@@ -2,6 +2,7 @@ import { graphqlExpress, graphiqlExpress } from 'apollo-server-express';
 import * as express from 'express';
 import * as bodyParser from 'body-parser';
 
+import { Injectable } from 'aerographql-core';
 import { Field, ObjectDefinition, ObjectImplementation, Resolver, Arg, Schema, BaseSchema, Interface } from 'aerographql-schema';
 
 /** 
@@ -29,6 +30,16 @@ let todos: { [ key: string ]: (PonctualTodo | RecurentTodo) [] } =
             { id: '7', title: 'Todo2', content: 'Steeve Todo2 content', date: 'Tuesday'  },
             { id: '8', title: 'Todo3', content: 'Steeve Todo3 content', occurence: 'Every Day'  } ]
     };
+
+/** 
+ * Custom service to interact with the DB
+*/
+@Injectable() 
+class UserService {
+    find( name: string ) {
+        return users.find( u => u.name === name );
+    }
+}
 
 /** 
  * Schema definitions
@@ -76,16 +87,18 @@ export class UserImpl {
 
 @ObjectImplementation( { name: 'RootQuery' } )
 export class RootQuery {
+    constructor( private userService: UserService ) {}
 
     @Resolver( { type: User } )
     user( @Arg() name: string ): User | Promise<User> {
-        return users.find( u => u.name === name );
+        return this.userService.find( name );
     }
 }
 
 @Schema( {
     rootQuery: 'RootQuery',
-    components: [ RootQuery, User, UserImpl, Todo, PonctualTodo, RecurentTodo ]
+    components: [ RootQuery, User, UserImpl, Todo, PonctualTodo, RecurentTodo ],
+    providers: [ UserService ]
 } )
 export class MySchema extends BaseSchema {
 }
