@@ -1,6 +1,6 @@
 import 'reflect-metadata';
 import {
-    META_KEY_METAOBJECT_TYPE, METAOBJECT_TYPES,
+    META_KEY_METAOBJECT_TYPE, METAOBJECT_TYPES, Injector,
     deduplicateArray, getMetaObjectType, isPromise, executeAsyncFunctionSequentialy
 } from 'aerographql-core';
 import { Context, FactoryContext } from '../shared';
@@ -14,11 +14,14 @@ export function Middleware() {
     }
 }
 
+/**
+ * Interface that need to be implemented be every Middleware
+ */
 export interface BaseMiddleware<T=any> {
     execute( src: any, args: any, context: Context ): T | Promise<T>;
 }
 
-export class MiddlewareError {
+class MiddlewareError {
     constructor( public middleware: string, public reason: string ) {
     }
     toString() {
@@ -26,22 +29,31 @@ export class MiddlewareError {
     }
 }
 
+/** 
+ * Structure describing how a mw should be called and how to store it's results.
+*/
 export interface MiddlewareDescriptor {
     provider: Function;
     options?: any;
     resultName?: string;
 }
 
-export type MiddlewareResolver = ( src: any, args: any, context: Context ) => Promise<any>;
+type MiddlewareResolver = ( src: any, args: any, context: Context ) => Promise<any>;
 
-export let createMiddlewareSequence = ( middlewares: MiddlewareDescriptor[], factoryContext: FactoryContext ) => {
+/**
+ * Convert a list of Mw descriptor into a list of Function wrapping the AeroGraphQL behavior for middleware.
+ * Those functions will take care of setting the options for the each MW and store MW results appropriatly in the Context
+ * @param middlewares 
+ * @param factoryContext 
+ */
+export let createMiddlewareSequence = ( middlewares: MiddlewareDescriptor[], injector: Injector ) => {
 
     // Wrap each middleware call in a closure that always return a promise
     let mwSequence: MiddlewareResolver[] = [];
 
     middlewares.forEach( mwDesc => {
 
-        let mwInstance: BaseMiddleware = factoryContext.injector.get( mwDesc.provider, null );
+        let mwInstance: BaseMiddleware = injector.get( mwDesc.provider, null );
         if ( !mwInstance ) {
             throw new Error( `Unable to find instance at token "${mwDesc.provider}" for middleware` );
         }
@@ -90,12 +102,17 @@ export let createMiddlewareSequence = ( middlewares: MiddlewareDescriptor[], fac
                 delete context.middlewareOptions;
 
                 // If result must be stored
-                if ( rv && mwDesc.resultName ) {
-                    if ( !context.middlewareResults[ mwDesc.resultName ] ) context.middlewareResults[ mwDesc.resultName ] = [];
-                    context.middlewareResults[ mwDesc.resultName ].push( rv );
+                if ( rv ) {
+                    if ( mwDesc.resultName ) {
+                        if ( !context.middlewareResults[ mwDesc.resultName ] )
+                            context.middlewareResults[ mwDesc.resultName ] = [];
+                        context.middlewareResults[ mwDesc.resultName ].push( rv );
+                    }
+
+                    return Promise.resolve( rv );
+                } else {
+                    return Promise.reject( new MiddlewareError( providerName, rv ) );
                 }
-                // If it's not a promise, wrap it into a promise
-                return rv ? Promise.resolve( rv ) : Promise.reject( new MiddlewareError( providerName, rv ) );
             }
         };
 

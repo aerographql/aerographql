@@ -4,7 +4,7 @@ import { isPromise, executeAsyncFunctionSequentialy } from 'aerographql-core';
 import { ObjectDefinitionMetaObject } from '../object';
 import { ResolverMetaObject } from './resolver';
 import { Context, FactoryContext } from '../shared';
-import { MiddlewareError, BaseMiddleware, createMiddlewareSequence } from '../middleware';
+import { BaseMiddleware, createMiddlewareSequence } from '../middleware';
 
 export let resolverConfigFactory = function ( metaObject: ResolverMetaObject, fieldName: string, factoryContext: FactoryContext ) {
     let fieldConfig: GraphQLFieldConfig<any, any> = {
@@ -55,7 +55,7 @@ export let resolverConfigFactory = function ( metaObject: ResolverMetaObject, fi
     fieldConfig.resolve = ( source: any, args: any, context: Context ) => {
         
         // Build the middleware chain
-        let middlewareSequence = createMiddlewareSequence( metaObject.middlewares, factoryContext );
+        let middlewareSequence = createMiddlewareSequence( metaObject.middlewares, factoryContext.injector );
 
         // Grab the instance of the implementation from the dependecy injection system
         let instance = factoryContext.injector.get( metaObject.instanceToken, null );
@@ -92,12 +92,10 @@ export let resolverConfigFactory = function ( metaObject: ResolverMetaObject, fi
         let p = executeAsyncFunctionSequentialy( middlewareSequence, [ source, args, context ] );
 
         return p.then( results => {
-
-
             return Reflect.apply( resolveFunction, instance, expandedArgs );
-        }, ( middlewareError: MiddlewareError ) => {
+        }, ( error ) => {
             // Throw error, so it will be catched by the graphql layer
-            throw middlewareError;
+            throw error;
         } );
     };
 

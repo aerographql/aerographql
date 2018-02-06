@@ -5,8 +5,8 @@ import { FactoryContext, Context } from '../shared';
 import { createMiddlewareSequence, MiddlewareDescriptor, Middleware, BaseMiddleware } from './middleware';
 
 describe( 'createMiddlewareSequence function', () => {
-    let createFactoryContext = ( providers: Function[] ) => {
-        return new FactoryContext( Injector.resolveAndCreate( providers ) );
+    let createInjector = ( providers: Function[] ) => {
+        return Injector.resolveAndCreate( providers  );
     };
 
     let cloneObject = ( obj: any ) => {
@@ -17,7 +17,7 @@ describe( 'createMiddlewareSequence function', () => {
 
         let descs: MiddlewareDescriptor[] = [];
 
-        let s = createMiddlewareSequence( descs, createFactoryContext( [] ) );
+        let s = createMiddlewareSequence( descs, createInjector( [] ) );
         let p = executeAsyncFunctionSequentialy( s );
 
         expect( p ).resolves.toEqual( [] );
@@ -32,7 +32,7 @@ describe( 'createMiddlewareSequence function', () => {
         }
         let descs: MiddlewareDescriptor[] = [ { provider: MA, options: 'Options' } ];
 
-        let s = createMiddlewareSequence( descs, createFactoryContext( [ MA ] ) );
+        let s = createMiddlewareSequence( descs, createInjector( [ MA ] ) );
         let p = await executeAsyncFunctionSequentialy( s );
 
         expect( p ).toEqual( [ "A" ] );
@@ -67,7 +67,7 @@ describe( 'createMiddlewareSequence function', () => {
             { provider: MC, options: 'OptionsC', resultName: 'C' }
         ];
 
-        let s = createMiddlewareSequence( descs, createFactoryContext( [ MA, MB, MC ] ) );
+        let s = createMiddlewareSequence( descs, createInjector( [ MA, MB, MC ] ) );
         let result = await executeAsyncFunctionSequentialy( s, [ null, null, {} ] );
 
         expect( result ).toEqual( [ "A", "B", "C" ] );
