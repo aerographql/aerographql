@@ -155,12 +155,16 @@ describe( 'objectTypeFactory function', () => {
         @Field( { type: 'Float' } ) fieldB: number[];
     }
 
-    @ObjectImplementation( { name: 'TypeA', middlewares: [ MA, MB ], implements: [ IB ] } )
+    @ObjectImplementation( {
+        name: 'TypeA',
+        middlewares: [ { provider: MA, resultName: 'A' }, { provider: MB, resultName: 'B' } ],
+        implements: [ IB ]
+    } )
     class TypeImplA {
 
         @Resolver( {
             type: 'Int',
-            middlewares: [ MC, { provider: MB, options: 'MwOptions' } ]
+            middlewares: [ { provider: MC, resultName: 'C' }, { provider: MB, options: 'MwOptions', resultName: 'B' } ]
         } )
         resolverA( @Arg() input: InputA ) { return 'ResolverAReturn'; }
 
@@ -351,7 +355,7 @@ describe( 'objectTypeFactory function', () => {
                 resovlerC.resolve( source, args, context, null ).then( ( result: any ) => {
                     expect( result ).toBe( 'ResolverCReturn' );
                     expect( spy ).toHaveBeenCalledTimes( 1 );
-                    expect( spy ).toHaveBeenCalledWith( source, args.input, { middlewareResults: [ 'MiddlewareAReturn', 'MiddlewareBReturn' ] } )
+                    expect( spy ).toHaveBeenCalledWith( source, args.input, { middlewareResults: { A: [ 'MiddlewareAReturn' ], B: [ 'MiddlewareBReturn' ] } } )
                 } );
             } );
 
@@ -366,7 +370,7 @@ describe( 'objectTypeFactory function', () => {
                 resovlerA.resolve( source, args, context, null ).then( ( result: any ) => {
                     expect( result ).toBe( 'ResolverAReturn' );
                     expect( spy ).toHaveBeenCalledTimes( 1 );
-                    expect( spy ).toHaveBeenCalledWith( args.input, { middlewareResults: [ true, 'MiddlewareBReturn' ] } )
+                    expect( spy ).toHaveBeenCalledWith( args.input, { middlewareResults: { C: [ true ], B: [ 'MiddlewareBReturn' ] } } )
                 } );
             } );
         } );

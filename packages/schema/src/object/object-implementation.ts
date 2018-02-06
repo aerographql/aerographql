@@ -6,7 +6,8 @@ import {
     META_KEY_METAOBJECT_TYPE, getFunctionParametersName, META_KEY_DESIGN_PARAMSTYPES, META_KEY_ARGS_MAP,
     META_KEY_DESIGN_TYPE, isOfMetaObjectType, getMetaObject, convertTypeFromTsToGraphQL, ensureMetadata, getMetaObjectType
 } from 'aerographql-core';
-import { ResolverMetaObjectMap, ResolverMiddlewareMetaObject } from '../resolver';
+import { MiddlewareDescriptor } from '../middleware';
+import { ResolverMetaObjectMap } from '../resolver';
 import { ArgsMetaObject, getArgsMetaObject } from '../arg';
 import { InterfaceMetaObject } from '../interface';
 import { ObjectDefinitionMetaObject } from './object-definition';
@@ -38,25 +39,9 @@ export function ObjectImplementation( config: ObjectImplementationConfig = {} ) 
         } );
 
         // Extract middleware defined at the type level 
-        let typeMiddlewares: ResolverMiddlewareMetaObject[] = [];
+        let typeMiddlewares: MiddlewareDescriptor[] = [];
         if ( config.middlewares ) {
-            typeMiddlewares = config.middlewares.map( m => {
-                // If Middleware is directly provided as a Function
-                if ( typeof m === 'function' ) {
-                    if ( !isOfMetaObjectType( m, METAOBJECT_TYPES.middleware ) )
-                        throw new Error( `Provided middleware is not annotated with @Middleware` );
-
-                    return {
-                        provider: m,
-                        options: null
-                    }
-                } else {
-                    return {
-                        provider: m.provider,
-                        options: m.options
-                    }
-                }
-            } );
+            typeMiddlewares = config.middlewares;
         }
 
         let fieldsImpl = ensureMetadata<ResolverMetaObjectMap>( META_KEY_RESOLVERS_MAP, ctr, {} );
@@ -64,7 +49,7 @@ export function ObjectImplementation( config: ObjectImplementationConfig = {} ) 
         // Override middleware at the field level if they are not provided
         for ( let key in fieldsImpl ) {
             let field = fieldsImpl[ key ];
-            if ( field.middlewares === null ) {
+            if ( field.middlewares.length === 0 ) {
                 field.middlewares = typeMiddlewares
             }
         }
@@ -81,16 +66,12 @@ export function ObjectImplementation( config: ObjectImplementationConfig = {} ) 
     }
 }
 
-export interface ObjectImplementationMiddlewareConfig {
-    provider: Function;
-    options?: any;
-}
 
 export interface ObjectImplementationConfig {
     name?: string;
     description?: string;
     implements?: Function[];
-    middlewares?: ( ObjectImplementationMiddlewareConfig | Function )[];
+    middlewares?: MiddlewareDescriptor[];
 }
 
 export interface ObjectImplementationMetaObject {

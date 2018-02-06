@@ -7,6 +7,7 @@ import {
 } from 'aerographql-core';
 import { ArgsMetaObject, getArgsMetaObject } from '../arg';
 import { ObjectDefinitionMetaObject } from '../object';
+import { MiddlewareDescriptor } from '../middleware';
 
 /**
  * Field Implementation decorator
@@ -48,26 +49,9 @@ export function Resolver( config: ResolverConfig ): MethodDecorator {
 
         // Prepare middleware
         // If middleware is null this indicated that they can be ovverided by middleware specified at a higher level (e.g: type level)
-        let middlewares: ResolverMiddlewareMetaObject[] = null;
+        let middlewares: MiddlewareDescriptor[] = [];
         if ( config.middlewares ) {
-            middlewares = [];
-            middlewares = config.middlewares.map( m => {
-                let mw: ResolverMiddlewareMetaObject;
-
-                if ( typeof m === 'function' ) {
-                    mw = {
-                        provider: m,
-                        options: undefined
-                    }
-                } else {
-                    mw = {
-                        provider: m.provider,
-                        options: m.options
-                    }
-                }
-
-                return mw;
-            } );
+            middlewares = config.middlewares;
         }
 
         // Extract any args metadata for this field
@@ -90,23 +74,13 @@ export function Resolver( config: ResolverConfig ): MethodDecorator {
     }
 }
 
-export interface ResolverMiddlewareConfig {
-    provider: Function;
-    options?: any;
-}
-
 export interface ResolverConfig {
     name?: string,
     type?: string | Function,
     nullable?: boolean,
     list?: boolean,
     description?: string,
-    middlewares?: ( ResolverMiddlewareConfig | Function )[];
-}
-
-export interface ResolverMiddlewareMetaObject {
-    provider: Function;
-    options?: any;
+    middlewares?: MiddlewareDescriptor[];
 }
 
 export interface ResolverMetaObject {
@@ -116,7 +90,7 @@ export interface ResolverMetaObject {
     description: string,
     args: ArgsMetaObject,
     instanceToken: string,
-    middlewares: ResolverMiddlewareMetaObject[];
+    middlewares: MiddlewareDescriptor[];
 }
 
 export type ResolverMetaObjectMap = { [ key: string ]: ResolverMetaObject };

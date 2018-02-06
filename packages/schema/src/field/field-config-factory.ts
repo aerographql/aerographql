@@ -5,27 +5,27 @@ import { FieldMetaObject } from './field';
 import { ObjectDefinitionMetaObject } from '../object';
 import { FactoryContext } from '../shared';
 
-export let fieldConfigFactory = function ( def: FieldMetaObject, context: FactoryContext ) {
+export let fieldConfigFactory = function ( metaObject: FieldMetaObject, context: FactoryContext ) {
     let fieldConfig: GraphQLFieldConfig<any, any> = {
         type: null
     };
 
-    if ( def.description )
-        fieldConfig.description = def.description;
+    if ( metaObject.description )
+        fieldConfig.description = metaObject.description;
 
-    if ( !context.isValidType( def.type ) ) {
-        throw new Error( `Type "${def.type}" is not valid` )
+    if ( !context.isValidType( metaObject.type ) ) {
+        throw new Error( `Type "${metaObject.type}" is not valid` )
     }
 
-    let type = context.lookupType( def.type );
+    let type = context.lookupType( metaObject.type );
     if ( ( type instanceof GraphQLInputObjectType ) || ( type instanceof GraphQLInterfaceType ) )
-        throw new Error( `Type "${def.type}" is not a valid type` )
+        throw new Error( `Type "${metaObject.type}" is not a valid type` )
 
 
-    if ( def.list )
+    if ( metaObject.list )
         type = new GraphQLList<any>( type );
 
-    if ( !def.nullable )
+    if ( !metaObject.nullable )
         type = new GraphQLNonNull<any>( type );
 
     fieldConfig.type = type;

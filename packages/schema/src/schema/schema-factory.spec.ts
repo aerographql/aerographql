@@ -65,11 +65,11 @@ class TypeA {
 
 @ObjectImplementation( {
     name: 'TypeA',
-    middlewares: [ MiddlewareA, MiddlewareB ]
+    middlewares: [ { provider: MiddlewareA }, { provider: MiddlewareB } ]
 } )
 class TypeImplA {
 
-    @Resolver( { type: 'Int', middlewares: [ MiddlewareC, { provider: MiddlewareB, options: 'MwOptions' } ] } )
+    @Resolver( { type: 'Int', middlewares: [ { provider: MiddlewareC }, { provider: MiddlewareB, options: 'MwOptions' } ] } )
     resolverA( @Arg() input: InputA ) {
         return 'ResolverAReturn';
     }

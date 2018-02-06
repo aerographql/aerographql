@@ -1,10 +1,10 @@
 import { GraphQLFieldConfig, GraphQLNonNull, GraphQLList } from 'graphql';
-import { isPromise, executePromiseSequenticaly } from 'aerographql-core';
+import { isPromise, executeAsyncFunctionSequentialy } from 'aerographql-core';
 
 import { ObjectDefinitionMetaObject } from '../object';
 import { ResolverMetaObject } from './resolver';
 import { Context, FactoryContext } from '../shared';
-import { MiddlewareError, MiddlewareSignature, BaseMiddleware } from '../middleware';
+import { MiddlewareError, BaseMiddleware, createMiddlewareSequence } from '../middleware';
 
 export let resolverConfigFactory = function ( metaObject: ResolverMetaObject, fieldName: string, factoryContext: FactoryContext ) {
     let fieldConfig: GraphQLFieldConfig<any, any> = {
@@ -53,71 +53,14 @@ export let resolverConfigFactory = function ( metaObject: ResolverMetaObject, fi
     // Create a closure that wrap the call to middleware and the resolver.
     // provide the argument in the correct way
     fieldConfig.resolve = ( source: any, args: any, context: Context ) => {
+        
+        // Build the middleware chain
+        let middlewareSequence = createMiddlewareSequence( metaObject.middlewares, factoryContext );
 
-        // Wrap each middleware call in a closure that always return a promise
-        let wrappedMwCalls: MiddlewareSignature[] = [];
-
-        // Normalize context
-        if ( !context ) context = {};
-        if ( !context.middlewareOptions ) context.middlewareOptions = null;
-        if ( !context.middlewareResults ) context.middlewareResults = [];
-
-        metaObject.middlewares.forEach( mwInfo => {
-            let mwInstance: BaseMiddleware = factoryContext.injector.get( mwInfo.provider, null );
-            if ( !mwInstance ) {
-                throw new Error( `Unable to find instance at token "${mwInfo.provider}" for middleware` );
-            }
-
-            let executeFunction = mwInstance.execute;
-            if ( !executeFunction ) {
-                throw new Error( `No execute function found in middleware  "${mwInfo.provider}"` );
-            }
-
-            let providerName = mwInfo.provider.name;
-
-            let closure = () => {
-                // Assign current middleware options
-                context.middlewareOptions = mwInfo.options;
-
-                // Call the middleware
-                let rv = Reflect.apply( executeFunction, mwInstance, [ source, args, context ] );
-
-                // Normalize middleware return value to always return a promise
-                if ( isPromise( rv ) ) {
-                    // If return is a promise
-                    return rv.then( value => {
-                        // Reset mw option
-                        context.middlewareOptions = undefined;
-                        return value;
-                    }, reason => {
-                        // Reset mw option
-                        context.middlewareOptions = undefined;
-                        // Wrap the rejected value in a Middleware error that will be later on throw.
-                        return Promise.reject( new MiddlewareError( providerName, reason ) );
-                    } );
-                } else {
-                    // Reset mw option
-                    context.middlewareOptions = undefined;
-                    // If it's not a promise, wrap it into a promise
-                    return rv ? Promise.resolve( rv ) : Promise.reject( new MiddlewareError( providerName, rv ) );
-                }
-            };
-
-            // Store the closure
-            wrappedMwCalls.push( closure );
-        } );
-
-
-        // Grab the instane of the implementation from the dependecy injection system
+        // Grab the instance of the implementation from the dependecy injection system
         let instance = factoryContext.injector.get( metaObject.instanceToken, null );
         if ( !instance ) {
             throw new Error( `Unable to find instance at token "${metaObject.instanceToken}" for resolver` );
-        }
-
-        // Grab the resolve function itself
-        let resolveFunction = instance[ fieldName ];
-        if ( !resolveFunction ) {
-            throw new Error( `No resolver function found for field  "${fieldName}" of on resolver` );
         }
 
         // For each graphql arguments, insert them in an array with the same order 
@@ -135,17 +78,27 @@ export let resolverConfigFactory = function ( metaObject: ResolverMetaObject, fi
         // And provide the graphql context
         expandedArgs.push( context );
 
-        // Execute each wrapped middleware call sequentialy
-        return executePromiseSequenticaly( wrappedMwCalls ).then( results => {
-            // Attach middleware results
+        // Grab the resolve function itself
+        let resolveFunction = instance[ fieldName ];
+        if ( !resolveFunction ) {
+            throw new Error( `No resolver function found for field  "${fieldName}" of on resolver` );
+        }
 
-            context.middlewareResults = results;
+        // 
+        if ( !context ) context = {};
+        if ( !context.middlewareResults ) context.middlewareResults = {};
+
+        // Execute each middleware sequentialy
+        let p = executeAsyncFunctionSequentialy( middlewareSequence, [ source, args, context ] );
+
+        return p.then( results => {
+
+
             return Reflect.apply( resolveFunction, instance, expandedArgs );
         }, ( middlewareError: MiddlewareError ) => {
             // Throw error, so it will be catched by the graphql layer
             throw middlewareError;
         } );
-
     };
 
     return fieldConfig;

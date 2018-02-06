@@ -76,7 +76,7 @@ describe( 'getSchemaResolvers function', () => {
     @ObjectDefinition( { name: 'RootQuery' } )
     class RootQueryDefA { }
 
-    @ObjectImplementation( { name: 'RootQuery', middlewares: [ MiddlewareA ] } )
+    @ObjectImplementation( { name: 'RootQuery', middlewares: [ { provider: MiddlewareA } ] } )
     class RootQueryImplA {
         @Resolver( { type: 'Float' } )
         resolverA() { }
@@ -162,7 +162,6 @@ describe( 'When used from an express middleware, Schema', () => {
     @Schema( { rootQuery: 'RootQuery', components: [ RootQueryImplA ] } )
     class SchemaA extends BaseSchema { }
 
-
     let response: ServerMock.Response;
     let schema: SchemaA;
 
@@ -184,13 +183,12 @@ describe( 'When used from an express middleware, Schema', () => {
             expect( gqlResponse.data ).toBeDefined();
             expect( gqlResponse.data.query ).toBe( 28 );
             expect( response.statusCode ).toBe( 200 );
-            expect( RootQueryImplA.spy ).toBeCalledWith( { "middlewareOptions": null, "middlewareResults": [] } );
+            expect( RootQueryImplA.spy ).toBeCalledWith( { "middlewareResults": {} } );
             done();
         } );
     } )
 
     it( 'should work with simple query and additional context values', ( done ) => {
-
 
         let middleware = ServerMock.createMiddleware( schema, { value1: 'value1' } );
         let request = ServerMock.createRequest( "{ query  }" );
@@ -203,7 +201,7 @@ describe( 'When used from an express middleware, Schema', () => {
             expect( gqlResponse.data.query ).toBe( 28 );
             expect( response.statusCode ).toBe( 200 );
             expect( RootQueryImplA.spy ).toBeCalled();
-            expect( RootQueryImplA.spy ).toBeCalledWith( { "middlewareOptions": null, "middlewareResults": [], "value1": "value1" } )
+            expect( RootQueryImplA.spy ).toBeCalledWith( { "middlewareResults": {}, "value1": "value1" } )
             done();
         } );
     } );

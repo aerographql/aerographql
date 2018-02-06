@@ -3,10 +3,10 @@ export let isPromise = function ( obj: any ): obj is Promise<any> {
 };
 
 
-export let executePromiseSequenticaly = function ( funcs: Function[] ) {
+export async function executeAsyncFunctionSequentialy<T extends Function >( funcs: T[], params: any[] = [] ) {
     return funcs.reduce( ( promise, func ) => {
         return promise.then( results => {
-            return func().then( ( result: any ) => {
+            return func( ...params ).then( ( result: any ) => {
                 return results.concat( result )
             } )
         } )
@@ -33,7 +33,7 @@ export let deduplicateArray = function ( arr: any[] ) {
     return Array.from( it );
 }
 
-export function ensureMetadata<T>(  key: string, target: any,defaultValue: any ) {
+export function ensureMetadata<T>( key: string, target: any, defaultValue: any ) {
     if ( !Reflect.hasMetadata( key, target ) ) {
         Reflect.defineMetadata( key, defaultValue, target );
     }
@@ -62,9 +62,9 @@ export class ID extends String {
 }
 
 export class Float extends Number {
-    
+
 }
 
 export class Int extends Number {
-    
+
 }

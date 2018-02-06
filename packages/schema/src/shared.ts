@@ -75,7 +75,7 @@ export class FactoryContext {
  * GraphQL context passed to each resolvers
 */
 export interface Context {
-    middlewareResults?: any[];
+    middlewareResults?: { [ key: string ]: any };
     middlewareOptions?: any;
 }
 
@@ -201,7 +201,7 @@ export namespace ServerMock {
         return httpMocks.createResponse( { eventEmitter: EventEmitter } );
     }
 
-    export let createMiddleware = (schema: BaseSchema, context: any = null ) => {
+    export let createMiddleware = ( schema: BaseSchema, context: any = null ) => {
         return graphqlExpress( { schema: schema.graphQLSchema, context: context } );
     }
 }
