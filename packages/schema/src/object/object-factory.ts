@@ -44,10 +44,10 @@ export let objectTypeFactory = function ( defsCtr: Function[], implsCtr: Functio
 
     let availableResolvers: { [ key: string ]: ResolverMetaObject } = {};
     impls.forEach( impl => {
-        for ( let key in impl.fields ) {
+        for ( let key in impl.resolvers ) {
             if ( availableResolvers[ key ] )
                 throw new Error( `Field "${key}" in implementation of type "${name}" is defined more than one time` );
-            availableResolvers[ key ] = impl.fields[ key ];
+            availableResolvers[ key ] = impl.resolvers[ key ];
         }
     } );
 

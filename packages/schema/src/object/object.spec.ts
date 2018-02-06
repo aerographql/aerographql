@@ -103,10 +103,10 @@ describe( '@Arg decorator', () => {
         expect( getMetaObject( TypeImplB1 ) ).not.toBeNull();
 
         let md = getMetaObject<ObjectImplementationMetaObject>( TypeImplB1 );
-        expect( md.fields.resolverA.args ).toHaveProperty( 'arg1' );
-        expect( md.fields.resolverA.args.arg1.index ).toBe( 1 );
-        expect( md.fields.resolverA.args.arg1.nullable ).toBe( false );
-        expect( md.fields.resolverA.args.arg1.type ).toBe( 'Int' );
+        expect( md.resolvers.resolverA.args ).toHaveProperty( 'arg1' );
+        expect( md.resolvers.resolverA.args.arg1.index ).toBe( 1 );
+        expect( md.resolvers.resolverA.args.arg1.nullable ).toBe( false );
+        expect( md.resolvers.resolverA.args.arg1.type ).toBe( 'Int' );
     } );
 } );
 

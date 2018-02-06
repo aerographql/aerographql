@@ -56,7 +56,7 @@ export function ObjectImplementation( config: ObjectImplementationConfig = {} ) 
 
         let md: ObjectImplementationMetaObject = {
             name: name,
-            fields: fieldsImpl,
+            resolvers: fieldsImpl,
             implements: implementInterfaces,
             description: desc
         };
@@ -76,7 +76,7 @@ export interface ObjectImplementationConfig {
 
 export interface ObjectImplementationMetaObject {
     name: string;
-    fields: ResolverMetaObjectMap;
+    resolvers: ResolverMetaObjectMap;
     description: string;
     implements: Function[];
 }

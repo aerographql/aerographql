@@ -106,7 +106,7 @@ export let createdResolveType = ( name: string, customResolveType: ResolveTypeFu
         }
         let oi = getMetaObject<ObjectImplementationMetaObject>( type );
         if ( oi ) {
-            types[ oi.name ] = Object.assign( {}, types[ oi.name ], oi.fields )
+            types[ oi.name ] = Object.assign( {}, types[ oi.name ], oi.resolvers )
         }
     } );
 

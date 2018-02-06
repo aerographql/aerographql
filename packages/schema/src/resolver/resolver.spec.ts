@@ -29,12 +29,12 @@ describe( '@Resolver decorator', () => {
         expect( getMetaObject( TypeImplA ) ).toBeDefined();
 
         let md = getMetaObject<ObjectImplementationMetaObject>( TypeImplA );
-        expect( md.fields ).toHaveProperty( 'fieldA' );
-        expect( md.fields.fieldA.description ).toBe( 'Desc' );
+        expect( md.resolvers ).toHaveProperty( 'fieldA' );
+        expect( md.resolvers.fieldA.description ).toBe( 'Desc' );
 
         md = getMetaObject<ObjectImplementationMetaObject>( TypeImplB );
-        expect( md.fields ).toHaveProperty( 'fieldA' );
-        expect( md.fields.fieldA.description ).toBe( 'Desc' );
+        expect( md.resolvers ).toHaveProperty( 'fieldA' );
+        expect( md.resolvers.fieldA.description ).toBe( 'Desc' );
     } )
 
     it( 'should set the correct metadata', () => {
@@ -43,11 +43,11 @@ describe( '@Resolver decorator', () => {
         let mo = getMetaObject<ObjectImplementationMetaObject>( TypeImplA );
         expect( mo.name ).toBe( 'TypeA' );
         expect( mo.description ).toBe( 'Desc' );
-        expect( mo.fields ).toHaveProperty( 'fieldA' );
-        expect( mo.fields.fieldA.type ).toBe( 'TypeA' );
-        expect( mo.fields.fieldA.list ).toBe( false );
-        expect( mo.fields.fieldA.nullable ).toBe( true );
-        expect( mo.fields.fieldA.instanceToken ).toBe( 'TypeImplA' );
+        expect( mo.resolvers ).toHaveProperty( 'fieldA' );
+        expect( mo.resolvers.fieldA.type ).toBe( 'TypeA' );
+        expect( mo.resolvers.fieldA.list ).toBe( false );
+        expect( mo.resolvers.fieldA.nullable ).toBe( true );
+        expect( mo.resolvers.fieldA.instanceToken ).toBe( 'TypeImplA' );
 
     } );
 
@@ -56,10 +56,10 @@ describe( '@Resolver decorator', () => {
 
         let mo = getMetaObject<ObjectImplementationMetaObject>( TypeImplB );
         expect( mo.name ).toBe( 'TypeA' );
-        expect( mo.fields ).toHaveProperty( 'fieldB' );
-        expect( mo.fields.fieldB.type ).toBe( 'TypeA' );
-        expect( mo.fields.fieldB.list ).toBe( true );
-        expect( mo.fields.fieldB.instanceToken ).toBe( 'TypeImplB' );
+        expect( mo.resolvers ).toHaveProperty( 'fieldB' );
+        expect( mo.resolvers.fieldB.type ).toBe( 'TypeA' );
+        expect( mo.resolvers.fieldB.list ).toBe( true );
+        expect( mo.resolvers.fieldB.instanceToken ).toBe( 'TypeImplB' );
     } );
 
     it( 'should throw in invalid configuration', () => {
@@ -79,10 +79,10 @@ describe( '@Arg decorator', () => {
         expect( getMetaObject( TypeImplA ) ).toBeDefined();
 
         let md = getMetaObject<ObjectImplementationMetaObject>( TypeImplA );
-        expect( md.fields.fieldA.args ).toHaveProperty( 'arg1' );
-        expect( md.fields.fieldA.args.arg1.index ).toBe( 1 );
-        expect( md.fields.fieldA.args.arg1.nullable ).toBe( false );
-        expect( md.fields.fieldA.args.arg1.type ).toBe( 'Int' );
+        expect( md.resolvers.fieldA.args ).toHaveProperty( 'arg1' );
+        expect( md.resolvers.fieldA.args.arg1.index ).toBe( 1 );
+        expect( md.resolvers.fieldA.args.arg1.nullable ).toBe( false );
+        expect( md.resolvers.fieldA.args.arg1.type ).toBe( 'Int' );
     } );
 } );
 
@@ -96,7 +96,7 @@ describe( 'resolverConfigFactory function', () => {
 
     it( 'should correclt create GrapgQL config', () => {
         let mo = getMetaObject<ObjectImplementationMetaObject>( TypeImplA );
-        let fmo = mo.fields.fieldA;
+        let fmo = mo.resolvers.fieldA;
 
         let gql = resolverConfigFactory( fmo, 'fieldA', context );
         expect( gql.type ).toBe( context.lookupType( getMetaObject( TypeImplA ).name ) );
