@@ -3,7 +3,8 @@ import { isPromise, executePromiseSequenticaly } from 'aerographql-core';
 
 import { ObjectDefinitionMetaObject } from '../object';
 import { ResolverMetaObject } from './resolver';
-import { Context, FactoryContext, MiddlewareError, MiddlewareSignature, BaseMiddleware } from '../shared';
+import { Context, FactoryContext } from '../shared';
+import { MiddlewareError, MiddlewareSignature, BaseMiddleware } from '../middleware';
 
 export let resolverConfigFactory = function ( metaObject: ResolverMetaObject, fieldName: string, factoryContext: FactoryContext ) {
     let fieldConfig: GraphQLFieldConfig<any, any> = {

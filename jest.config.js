@@ -8,5 +8,10 @@ module.exports = {
         "ts",
         "js"
     ],
-    "mapCoverage": true
+    "mapCoverage": true,
+    "globals": {
+        "ts-jest": {
+          "enableTsDiagnostics": true
+        }
+      }
 }

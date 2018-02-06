@@ -1,6 +1,3 @@
-import { EventEmitter } from 'events'
-import { ExpressHandler, graphqlExpress } from 'apollo-server-express';
-import * as httpMocks from 'node-mocks-http';
 import { getMetaObject, getMetaObjectType, METAOBJECT_TYPES } from 'aerographql-core';
 
 import { Union, UnionMetaObject } from './union';
@@ -8,7 +5,7 @@ import { unionFactory } from './union-factory';
 import { ObjectDefinition, ObjectImplementation, objectTypeFactory } from '../object';
 import { Resolver } from '../resolver';
 import { Schema, BaseSchema } from '../schema';
-import { FactoryContext } from '../shared';
+import { FactoryContext, ServerMock } from '../shared';
 import { Field } from '../field';
 
 describe( '@Union decorator', () => {
@@ -101,24 +98,19 @@ describe( 'When used from an express middleware, Union', () => {
     @Schema( { rootQuery: 'RootQuery', components: [ RootQueryA, UnionA, ObjectA, ObjectB ] } )
     class SchemaA extends BaseSchema { }
 
-    let response: httpMocks.MockResponse;
+    let response: ServerMock.Response;
+    let middleware: ServerMock.Middleware;
     let schema: SchemaA;
-    let middleware: ExpressHandler;
 
     beforeEach( () => {
         schema = new SchemaA();
-        response = httpMocks.createResponse( { eventEmitter: EventEmitter } );
+        response = ServerMock.createResponse();
         RootQueryA.spy = jest.fn();
-        middleware = graphqlExpress( { schema: schema.graphQLSchema } );
+        middleware = ServerMock.createMiddleware( schema );
     } )
 
     it( 'should work with polymorphic types1', ( done ) => {
-        let request = httpMocks.createRequest( {
-            method: 'POST',
-            body: {
-                query: `{ 
-                    query1 { ... on ObjectA { fieldA fieldB } } }` }
-        } );
+        let request = ServerMock.createRequest( `{ query1 { ... on ObjectA { fieldA fieldB } } }` );
 
         middleware( request, response, null );
         response.on( 'end', () => {

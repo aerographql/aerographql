@@ -1,7 +1,4 @@
 import { Injector, getMetaObject, Injectable } from 'aerographql-core';
-import { EventEmitter } from 'events'
-import { ExpressHandler, graphqlExpress } from 'apollo-server-express';
-import * as httpMocks from 'node-mocks-http';
 import { GraphQLSchema } from 'graphql';
 
 import { Schema, SchemaMetaObject, getSchemaProviders } from './schema';
@@ -10,7 +7,8 @@ import { ObjectDefinition, ObjectImplementation, objectTypeFactory } from '../ob
 import { Scalar } from '../scalar';
 import { Interface } from '../interface';
 import { schemaFactory } from './schema-factory';
-import { Middleware, FactoryContext } from '../shared';
+import { FactoryContext, ServerMock } from '../shared';
+import { Middleware } from '../middleware';
 import { Resolver } from '../resolver';
 
 
@@ -165,26 +163,19 @@ describe( 'When used from an express middleware, Schema', () => {
     class SchemaA extends BaseSchema { }
 
 
-    let response: httpMocks.MockResponse;
+    let response: ServerMock.Response;
     let schema: SchemaA;
 
     beforeEach( () => {
         schema = new SchemaA();
-        response = httpMocks.createResponse( { eventEmitter: EventEmitter } );
+        response = ServerMock.createResponse();
         RootQueryImplA.spy = jest.fn();
     } )
 
     it( 'should work with simple query', ( done ) => {
 
-        let middleware = graphqlExpress( { schema: schema.graphQLSchema } )
-        let request = httpMocks.createRequest( {
-            method: 'POST',
-            body: {
-                variables: null,
-                operationName: null,
-                query: "{ query  }"
-            }
-        } );
+        let middleware = ServerMock.createMiddleware( schema );
+        let request = ServerMock.createRequest( "{ query  }" );
 
         middleware( request, response, null );
 
@@ -200,15 +191,9 @@ describe( 'When used from an express middleware, Schema', () => {
 
     it( 'should work with simple query and additional context values', ( done ) => {
 
-        let middleware = graphqlExpress( { schema: schema.graphQLSchema, context: { value1: 'value1' } } );
-        let request = httpMocks.createRequest( {
-            method: 'POST',
-            body: {
-                variables: null,
-                operationName: null,
-                query: "{ query  }"
-            }
-        } );
+
+        let middleware = ServerMock.createMiddleware( schema, { value1: 'value1' } );
+        let request = ServerMock.createRequest( "{ query  }" );
 
         middleware( request, response, null );
 

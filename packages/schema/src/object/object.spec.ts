@@ -2,9 +2,6 @@ import {
     GraphQLSchema, GraphQLObjectType, GraphQLScalarType, GraphQLNonNull, GraphQLList,
     GraphQLInputObjectType, GraphQLResolveInfo
 } from 'graphql';
-import { EventEmitter } from 'events'
-import { ExpressHandler, graphqlExpress } from 'apollo-server-express';
-import * as httpMocks from 'node-mocks-http';
 import {
     getMetaObject, getMetaObjectType,
     METAOBJECT_TYPES, TestBed, Injector
@@ -15,7 +12,8 @@ import { InputObject, InputObjectMetaObject, inputFactory } from '../input-objec
 import { Field } from '../field';
 import { Resolver } from '../resolver';
 import { Arg } from '../arg';
-import { Middleware, FactoryContext } from '../shared';
+import { Middleware } from '../middleware';
+import { FactoryContext, ServerMock } from '../shared';
 import { objectTypeFactory } from './object-factory';
 import { Schema, BaseSchema } from '../schema';
 import { Interface, interfaceFactory } from '../interface';
@@ -398,24 +396,19 @@ class TestSchema extends BaseSchema {
 
 
 describe( 'When used from an express middleware, Object', () => {
-    let response: httpMocks.MockResponse;
+    let response: ServerMock.Response;
     let schema: TestSchema;
-    let middleware: ExpressHandler;
+    let middleware: ServerMock.Middleware;
 
     beforeEach( () => {
         schema = new TestSchema();
-        response = httpMocks.createResponse( { eventEmitter: EventEmitter } );
+        response = ServerMock.createResponse();
+        middleware = ServerMock.createMiddleware( schema );
         TestRootQuery.spy = jest.fn();
-        middleware = graphqlExpress( { schema: schema.graphQLSchema } );
     } )
 
     it( 'should work with simple query', ( done ) => {
-        let request = httpMocks.createRequest( {
-            method: 'POST',
-            body: {
-                query: `{ query1 { fieldA fieldB  } }`
-            }
-        } );
+        let request = ServerMock.createRequest( `{ query1 { fieldA fieldB  } }` );
 
         middleware( request, response, null );
         response.on( 'end', () => {

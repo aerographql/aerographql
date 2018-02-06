@@ -1,10 +1,14 @@
 import 'reflect-metadata';
 import { Injector, getMetaObject, META_KEY_METAOBJECT_TYPE, METAOBJECT_TYPES, deduplicateArray, getMetaObjectType } from 'aerographql-core';
 import { GraphQLString, GraphQLFloat, GraphQLInt, GraphQLID, GraphQLBoolean } from 'graphql';
+import { EventEmitter } from 'events'
+import * as httpMocks from 'node-mocks-http';
+import { ExpressHandler, graphqlExpress } from 'apollo-server-express';
 
 import { FieldMetaObject } from './field/field';
 import { ObjectDefinitionMetaObject } from './object/object-definition';
 import { ObjectImplementationMetaObject } from './object/object-implementation';
+import { BaseSchema } from './schema/base-schema';
 
 /** 
  * Context structure passed along factory methods.
@@ -75,31 +79,6 @@ export interface Context {
     middlewareOptions?: any;
 }
 
-
-/**
- * Middleware decorator
- */
-export function Middleware() {
-    return function ( ctr: Function ) {
-
-        Reflect.defineMetadata( META_KEY_METAOBJECT_TYPE, METAOBJECT_TYPES.middleware, ctr );
-    }
-}
-
-export type MiddlewareSignature = ( ...args: any[] ) => Promise<any>;
-
-export interface BaseMiddleware {
-    execute( src: any, args: any, context: Context ): Promise<any>;
-}
-
-export class MiddlewareError {
-    constructor( public middleware: string, public reason: string ) {
-    }
-
-    toString() {
-        return `Middleware  "${this.middleware}" error with reason "${this.reason}"`;
-    }
-}
 
 /** 
  * Default method to resolve type for union and interface is to check the metadata available on the value conestructor, if any.
@@ -194,7 +173,36 @@ export let createdResolveType = ( name: string, customResolveType: ResolveTypeFu
             }
         }
 
-        throw new Error(`AeroGraphQL was not able to resolve type "${name}", please specify a customResolveType callback`);
+        throw new Error( `AeroGraphQL was not able to resolve type "${name}", please specify a customResolveType callback` );
+    }
+}
+
+/** 
+ * Tools to create fake graphql server that can be used to test graphql query from end to end
+*/
+export namespace ServerMock {
+
+    export type Request = httpMocks.MockRequest;
+    export type Response = httpMocks.MockResponse;
+    export type Middleware = ExpressHandler;
+
+    export let createRequest = ( query: string, vars: any = null, operationName: string = null ): Request => {
+        return httpMocks.createRequest( {
+            method: 'POST',
+            body: {
+                variables: vars,
+                operationName: operationName,
+                query: query
+            }
+        } );
     }
 
+    export let createResponse = (): Response => {
+        return httpMocks.createResponse( { eventEmitter: EventEmitter } );
+    }
+
+    export let createMiddleware = (schema: BaseSchema, context: any = null ) => {
+        return graphqlExpress( { schema: schema.graphQLSchema, context: context } );
+    }
 }
+

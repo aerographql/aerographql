@@ -1,6 +1,3 @@
-import { EventEmitter } from 'events'
-import { ExpressHandler, graphqlExpress } from 'apollo-server-express';
-import * as httpMocks from 'node-mocks-http';
 import { getMetaObject, getMetaObjectType, METAOBJECT_TYPES } from 'aerographql-core';
 
 import { Interface, InterfaceMetaObject } from './interface';
@@ -8,7 +5,7 @@ import { interfaceFactory } from './interface-factory';
 import { ObjectDefinition, ObjectImplementation } from '../object';
 import { Resolver } from '../resolver';
 import { Schema, BaseSchema } from '../schema';
-import { FactoryContext } from '../shared';
+import { FactoryContext, ServerMock } from '../shared';
 import { Field } from '../field';
 
 
@@ -95,22 +92,22 @@ describe( 'When used from an express middleware, Interface', () => {
     }
 
 
-    @Interface( )
+    @Interface()
     class InterfaceB {
-        @Field( ) fieldA: number;
-        @Field( ) fieldB: string;
+        @Field() fieldA: number;
+        @Field() fieldB: string;
     }
 
     @ObjectDefinition( { implements: [ InterfaceB ] } )
     class TypeC {
-        @Field( ) fieldA: number = 0;
-        @Field( ) fieldB: string = '';
+        @Field() fieldA: number = 0;
+        @Field() fieldB: string = '';
     }
 
     @ObjectDefinition( { implements: [ InterfaceB ] } )
     class TypeD {
-        @Field( ) fieldA: number = 0;
-        @Field( ) fieldB: string = '';
+        @Field() fieldA: number = 0;
+        @Field() fieldB: string = '';
     }
 
     @ObjectImplementation( { name: 'RootQuery' } )
@@ -146,23 +143,19 @@ describe( 'When used from an express middleware, Interface', () => {
     }
 
 
-    let response: httpMocks.MockResponse;
+    let response: ServerMock.Response;
+    let middleware: ServerMock.Middleware;
     let schema: TestSchema;
-    let middleware: ExpressHandler;
 
     beforeEach( () => {
         schema = new TestSchema();
-        response = httpMocks.createResponse( { eventEmitter: EventEmitter } );
+        response = ServerMock.createResponse();
         RootQuery.spy = jest.fn();
-        middleware = graphqlExpress( { schema: schema.graphQLSchema } );
+        middleware = ServerMock.createMiddleware( schema );
     } )
 
     it( 'should work with polymorphic types1', ( done ) => {
-        let request = httpMocks.createRequest( {
-            method: 'POST',
-            body: {
-                query: `{ query1 { fieldA fieldB ... on TestType1 { fieldC } } }` }
-        } );
+        let request = ServerMock.createRequest( `{ query1 { fieldA fieldB ... on TestType1 { fieldC } } }` );
 
         middleware( request, response, null );
         response.on( 'end', () => {
@@ -174,11 +167,7 @@ describe( 'When used from an express middleware, Interface', () => {
     } )
 
     it( 'should work with polymorphic types2', ( done ) => {
-        let request = httpMocks.createRequest( {
-            method: 'POST',
-            body: {
-                query: `{ query2 { fieldA fieldB ... on TestType2 { fieldD } } }` }
-        } );
+        let request = ServerMock.createRequest( `{ query2 { fieldA fieldB ... on TestType2 { fieldD } } }` );
 
         middleware( request, response, null );
         response.on( 'end', () => {
@@ -190,11 +179,7 @@ describe( 'When used from an express middleware, Interface', () => {
     } )
 
     it( 'should error when type resolution is not possible', ( done ) => {
-        let request = httpMocks.createRequest( {
-            method: 'POST',
-            body: {
-                query: `{ query3 { fieldA fieldB } }` }
-        } );
+        let request = ServerMock.createRequest( `{ query3 { fieldA fieldB } }` );
 
         middleware( request, response, null );
         response.on( 'end', () => {
