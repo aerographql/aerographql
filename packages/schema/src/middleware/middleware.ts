@@ -3,7 +3,7 @@ import {
     META_KEY_METAOBJECT_TYPE, METAOBJECT_TYPES, Injector,
     deduplicateArray, getMetaObjectType, isPromise, executeAsyncFunctionSequentialy
 } from 'aerographql-core';
-import { Context, FactoryContext } from '../shared';
+import { Context } from '../shared';
 
 /**
  * Middleware decorator
