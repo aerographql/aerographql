@@ -6,7 +6,7 @@
   <img src="https://aerographql.github.io/documentation/images/logo-full.png">
 </p>
 
-**AeroGraphQL** is an opinionated [Typescript](https://www.typescriptlang.org/index.html) framework to create [GraphQL](http://graphql.org/learn/) server using a declarative approach.
+**AeroGraphQL** is a small and opinionated [Typescript](https://www.typescriptlang.org/index.html) toolkit to create [GraphQL](http://graphql.org/learn/) server using a declarative approach.
 
 # AeroGraphQL Schema
 
