@@ -18,7 +18,7 @@ let callIndex = 0;
 @Middleware()
 class MiddlewareA {
     execute() {
-        ( this as any )[ 'execute' ].callIndex = callIndex++;
+        ( this as any ).execute.callIndex = callIndex++;
         return 'A';
     }
 }
@@ -26,7 +26,7 @@ class MiddlewareA {
 @Middleware()
 class MiddlewareB {
     execute() {
-        ( this as any )[ 'execute' ].callIndex = callIndex++;
+        ( this as any ).execute.callIndex = callIndex++;
         return 'B';
     }
 }
@@ -34,12 +34,8 @@ class MiddlewareB {
 @Middleware()
 class MiddlewareC {
     execute( source: any, args: any ) {
-        ( this as any )[ 'execute' ].callIndex = callIndex++;
-
-        if ( args.input.errored )
-            return false;
-
-        return true;
+        ( this as any ).execute.callIndex = callIndex++;
+        return !args.input.errored;
     }
 }
 
@@ -48,23 +44,12 @@ class MiddlewareC {
     description: 'Desc',
 } )
 class InputA {
-
     @Field( { type: 'Boolean', description: 'Desc' } ) errored: boolean;
-}
-
-@ObjectDefinition( {
-    name: 'TypeA',
-    description: 'Desc',
-} )
-class TypeA {
-
-    @Field( { type: 'Int', description: 'Desc' } ) fieldA: number;
-    @Field( { type: 'String', description: 'Desc', nullable: true } ) fieldB: number;
-    @Field( { type: 'String', description: 'Desc' } ) fieldC: number[];
 }
 
 @ObjectImplementation( {
     name: 'TypeA',
+    description: 'Desc',
     middlewares: [ { provider: MiddlewareA }, { provider: MiddlewareB } ]
 } )
 class TypeImplA {
@@ -87,7 +72,7 @@ class TypeImplA {
 
 @Schema( {
     rootQuery: 'TypeA',
-    components: [ TypeA, InputA, TypeImplA ],
+    components: [ InputA, TypeImplA ],
 } )
 class SchemaA { }
 
@@ -100,7 +85,7 @@ beforeEach( () => {
         providers: [ TypeImplA, MiddlewareA, MiddlewareB, MiddlewareC ]
     } );
     factoryContext = new FactoryContext( injector );
-    graphqlSchema = schemaFactory( getMetaObject( SchemaA ), factoryContext );
+    graphqlSchema = schemaFactory( SchemaA, factoryContext );
 } );
 
 describe( 'For a type definition, Graphql factory', () => {
@@ -110,31 +95,6 @@ describe( 'For a type definition, Graphql factory', () => {
         expect( typeA ).toBeDefined();
         expect( typeA.description ).toEqual( 'Desc' );
         expect( typeA ).toBeInstanceOf( GraphQLObjectType );
-    } );
-
-    it( 'should create the correct fields ', () => {
-        let typeA = graphqlSchema.getType( 'TypeA' ) as GraphQLObjectType;
-        let fieldA = typeA.getFields().fieldA;
-        expect( fieldA ).toBeDefined();
-        expect( fieldA.name ).toBe( 'fieldA' );
-        expect( fieldA.description ).toBe( 'Desc' );
-
-        let fieldAType = fieldA.type as GraphQLNonNull<GraphQLScalarType>;
-        expect( fieldAType ).toBeInstanceOf( GraphQLNonNull );
-        expect( fieldAType.ofType ).toBeInstanceOf( GraphQLScalarType );
-        expect( fieldAType.ofType.name ).toBe( 'Int' );
-
-        let fieldB = typeA.getFields().fieldB;
-        let fieldBType = fieldB.type as GraphQLScalarType;
-        expect( fieldBType ).toBeInstanceOf( GraphQLScalarType );
-        expect( fieldBType.name ).toBe( 'String' );
-
-        let fieldC = typeA.getFields().fieldC;
-        let fieldCType = fieldC.type as GraphQLNonNull<GraphQLList<GraphQLScalarType>>;
-        expect( fieldCType ).toBeInstanceOf( GraphQLNonNull );
-        expect( fieldCType.ofType ).toBeInstanceOf( GraphQLList );
-        expect( fieldCType.ofType.ofType ).toBeInstanceOf( GraphQLScalarType );
-
     } );
 
 } );

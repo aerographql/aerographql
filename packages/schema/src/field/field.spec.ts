@@ -95,7 +95,7 @@ describe( 'fieldConfigFactory function', () => {
             providers: []
         } );
         factoryContext = new FactoryContext( injector );
-        graphqlSchema = schemaFactory( getMetaObject( TestSchemaA ), factoryContext );
+        graphqlSchema = schemaFactory( TestSchemaA, factoryContext );
         typeA = graphqlSchema.getType( 'TypeA' ) as GraphQLObjectType;
     } );
 

@@ -8,44 +8,67 @@ import { InterfaceMetaObject } from '../interface';
 import { ScalarMetaObject } from '../scalar';
 import { InputObjectMetaObject } from '../input-object';
 
+
+/**
+ * Convert an unordered flat list of components into a structure mapping each components type to a list of components
+ */
 export class ClassifiedComponents {
+
     unions: Function[] = [];
     interfaces: Function[] = [];
     objectDefinitions: Function[] = [];
     objectImplementations: Function[] = [];
     inputObject: Function[] = [];
     scalar: Function[] = [];
+
+    objects: { def: Function[], impl: Function[] }[];
+
+    constructor( components: Function[] ) {
+
+        // First classify each component according to it's meta type
+        components.forEach( ( component ) => {
+            let t = getMetaObjectType( component );
+            if ( t === METAOBJECT_TYPES.inputObject )
+                this.inputObject.push( component );
+            else if ( t === METAOBJECT_TYPES.interface )
+                this.interfaces.push( component );
+            else if ( t === METAOBJECT_TYPES.union )
+                this.unions.push( component );
+            else if ( t === METAOBJECT_TYPES.scalar )
+                this.scalar.push( component );
+            else if ( t === METAOBJECT_TYPES.objectDefinition )
+                this.objectDefinitions.push( component );
+            else if ( t === METAOBJECT_TYPES.objectImplementation )
+                this.objectImplementations.push( component );
+        } );
+
+        // Then create an extra array where each entry contain the full informations for a given object
+        // i.e: if an object named 'Test' have 2 definition and 3 implementation, the resulting array willbe:
+        // [ { def: [ Def1, Def2 ], impl: [ Impl1, Impl2, Impl3 ]}]
+        type ObjectsMap = { [ key: string ]: { def: Function[], impl: Function[] } };
+        let objects = this.objectDefinitions.reduce<ObjectsMap>( ( acc, typeCtr ) => {
+            let metaObject = getMetaObject<ObjectDefinitionMetaObject>( typeCtr );
+            if ( !acc[ metaObject.name ] ) acc[ metaObject.name ] = { def: [], impl: [] };
+
+            acc[ metaObject.name ].def.push( typeCtr );
+            return acc;
+        }, {} );
+
+        // Classify every implementation by their type name
+        objects = this.objectImplementations.reduce( ( acc, typeCtr ) => {
+            let metaObject = getMetaObject<ObjectImplementationMetaObject>( typeCtr );
+            if ( !acc[ metaObject.name ] ) acc[ metaObject.name ] = { def: [], impl: [] };
+
+            acc[ metaObject.name ].impl.push( typeCtr )
+            return acc;
+        }, objects );
+
+        this.objects = [];
+        for ( let k in objects )
+            this.objects.push( objects[ k ] );
+    }
 }
 
-/**
- * Convert an unordered flat list of components to a structure mapping each components type to a list of components
- * @param components Flat list of components
- */
-export function classifyComponents( components: Function[] ): ClassifiedComponents {
-
-    let classifiedComponents = new ClassifiedComponents();
-
-    classifiedComponents = components.reduce<ClassifiedComponents>( ( acc, component ) => {
-
-        let t = getMetaObjectType( component );
-        if ( t === METAOBJECT_TYPES.inputObject )
-            acc.inputObject.push( component );
-        else if ( t === METAOBJECT_TYPES.interface )
-            acc.interfaces.push( component );
-        else if ( t === METAOBJECT_TYPES.union )
-            acc.unions.push( component );
-        else if ( t === METAOBJECT_TYPES.scalar )
-            acc.scalar.push( component );
-        else if ( t === METAOBJECT_TYPES.objectDefinition )
-            acc.objectDefinitions.push( component );
-        else if ( t === METAOBJECT_TYPES.objectImplementation )
-            acc.objectImplementations.push( component );
-
-        return acc;
-    }, classifiedComponents )
-
-    return classifiedComponents;
-}
 
 /**
  * Return a list of providers to inject in an injector in order for this schema to be correctly wired.
@@ -57,7 +80,7 @@ export function getSchemaProviders( schema: Function ) {
     if ( !schemaMetaObject )
         throw new Error( 'Invalid schema provided' );
 
-    let components = classifyComponents( schemaMetaObject.components );
+    let components = new ClassifiedComponents( schemaMetaObject.components );
 
     let providers: Set<Function | Provider> = new Set();
 

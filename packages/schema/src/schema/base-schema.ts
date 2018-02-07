@@ -17,14 +17,13 @@ export class BaseSchema {
     constructor() {
 
         let ctr = this[ 'constructor' ];
-        let metadata = getMetaObject<SchemaMetaObject>( ctr );
 
         this.rootInjector = Injector.resolveAndCreate( [
             ...getSchemaProviders( ctr )
         ] );
 
         let factoryContext = new FactoryContext( this.rootInjector );
-        this.graphQLSchema = schemaFactory( metadata, factoryContext );
+        this.graphQLSchema = schemaFactory( ctr, factoryContext );
     }
 
     toString() {
