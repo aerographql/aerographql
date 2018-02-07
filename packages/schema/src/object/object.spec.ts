@@ -135,7 +135,7 @@ describe( 'objectTypeFactory function', () => {
 
     @Middleware()
     class MC {
-        execute( source: any, args: any ) {
+        execute( source: any, args: any, context: any ) {
             ( this as any )[ 'execute' ].callIndex = callIndex++;
             return !args.input.errored;
         }
@@ -259,7 +259,7 @@ describe( 'objectTypeFactory function', () => {
         } )
     } );
 
-    describe( 'with borh definition and implementation', () => {
+    describe( 'with both definition and implementation', () => {
         it( 'should create the correct interfaces array', () => {
             let interfaces = typeA.getInterfaces();
             expect( interfaces ).toContain( context.lookupType( getMetaObject( IA ).name ) );
@@ -278,7 +278,7 @@ describe( 'objectTypeFactory function', () => {
             resovlerC = typeA.getFields().resolverC;
         } );
 
-        it( 'should call the middlwares with the correct parameters and in the correct order', () => {
+        it( 'should call the middlwares with the correct parameters and in the correct order', async () => {
             let spy1 = jest.spyOn( injector.get( MC ), 'execute' );
             let spy2 = jest.spyOn( injector.get( MB ), 'execute' );
 
@@ -286,13 +286,15 @@ describe( 'objectTypeFactory function', () => {
             let source = {}
             let args = { input: { errored: false } };
             let context = {};
-            resovlerA.resolve( source, args, context, null ).then( ( result: any ) => {
+            let options: any = undefined;
+            let p = resovlerA.resolve( source, args, context, null ).then( ( result: any ) => {
                 expect( spy1 ).toHaveBeenCalledTimes( 1 );
-                expect( spy1 ).toHaveBeenCalledWith( source, args, context );
+                expect( spy1 ).toHaveBeenCalledWith( source, args, context, options );
                 expect( spy2 ).toHaveBeenCalledTimes( 1 );
-                expect( spy2 ).toHaveBeenCalledWith( source, args, context );
+                expect( spy2 ).toHaveBeenCalledWith( source, args, context, "MwOptions" );
                 expect( ( spy1 as any ).callIndex ).toBeLessThan( ( spy2 as any ).callIndex );
             } );
+            expect( p ).resolves.toBeUndefined();
         } );
 
         it( 'should stop on middleware error', () => {
@@ -303,13 +305,16 @@ describe( 'objectTypeFactory function', () => {
             // Fake call on the resolver (this is done by the graphql runtime)
             let source = {}
             let args = { input: { errored: true } };
-            let context = {};
-            resovlerA.resolve( source, args, context, null ).then( ( result: any ) => {
+            let context = { middlewareResults: {} };
+            let options: any = undefined;
+            let p = resovlerA.resolve( source, args, context, null ).then( () => {
                 expect( spy1 ).toHaveBeenCalledTimes( 1 );
-                expect( spy1 ).toHaveBeenCalledWith( source, args, context );
+                expect( spy1 ).toHaveBeenCalledWith( source, args, context, options );
                 expect( spy2 ).toHaveBeenCalledTimes( 0 );
                 expect( spy3 ).toHaveBeenCalledTimes( 0 );
             } );
+            expect( p ).rejects.toEqual( { "middleware": "MC", "reason": false } );
+
         } );
 
         describe( 'should call the resolver with the correct parameters', () => {
@@ -377,29 +382,31 @@ describe( 'objectTypeFactory function', () => {
     } );
 } )
 
-@ObjectDefinition( {
-    name: 'TestType1'
-} )
-class TestType1 {
-    @Field( { type: 'Int' } ) fieldA: number = 0;
-    @Field() fieldB: string = "String";
-}
-
-@ObjectImplementation( { name: 'TestRootQuery' } )
-class TestRootQuery {
-    static spy: jest.Mock;
-    @Resolver( { type: TestType1 } )
-    query1( parent: any, context: any ) {
-        TestRootQuery.spy( context );
-        return new TestType1();
-    }
-}
-@Schema( { rootQuery: 'TestRootQuery', components: [ TestRootQuery, TestType1 ] } )
-class TestSchema extends BaseSchema {
-}
 
 
 describe( 'When used from an express middleware, Object', () => {
+
+    @ObjectDefinition( {
+        name: 'TestType1'
+    } )
+    class TestType1 {
+        @Field( { type: 'Int' } ) fieldA: number = 0;
+        @Field() fieldB: string = "String";
+    }
+
+    @ObjectImplementation( { name: 'TestRootQuery' } )
+    class TestRootQuery {
+        static spy: jest.Mock;
+        @Resolver( { type: TestType1 } )
+        query1( parent: any, context: any ) {
+            TestRootQuery.spy( context );
+            return new TestType1();
+        }
+    }
+    @Schema( { rootQuery: 'TestRootQuery', components: [ TestRootQuery, TestType1 ] } )
+    class TestSchema extends BaseSchema {
+    }
+
     let response: ServerMock.Response;
     let schema: TestSchema;
     let middleware: ServerMock.Middleware;

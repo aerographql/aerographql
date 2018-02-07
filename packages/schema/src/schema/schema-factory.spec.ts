@@ -184,13 +184,15 @@ describe( 'Resolvers with middleware defined at the field implementation level',
         let source = {}
         let args = { input: { errored: false } };
         let context = {};
-        resovlerA.resolve( source, args, context, null ).then( ( result: any ) => {
+        let options: any = undefined;
+        let p = resovlerA.resolve( source, args, context, null ).then( ( result: any ) => {
             expect( spy1 ).toHaveBeenCalledTimes( 1 );
-            expect( spy1 ).toHaveBeenCalledWith( source, args, context );
+            expect( spy1 ).toHaveBeenCalledWith( source, args, context, options );
             expect( spy2 ).toHaveBeenCalledTimes( 1 );
-            expect( spy2 ).toHaveBeenCalledWith( source, args, context );
+            expect( spy2 ).toHaveBeenCalledWith( source, args, context, "MwOptions" );
             expect( ( spy1 as any ).callIndex ).toBeLessThan( ( spy2 as any ).callIndex );
         } );
+        expect( p ).resolves.toBeUndefined();
     } )
 
     it( 'should stop on middleware error', () => {
@@ -202,12 +204,14 @@ describe( 'Resolvers with middleware defined at the field implementation level',
         let source = {}
         let args = { input: { errored: true } };
         let context = {};
-        resovlerA.resolve( source, args, context, null ).then( ( result: any ) => {
+        let p = resovlerA.resolve( source, args, context, null ).then( ( result: any ) => {
             expect( spy1 ).toHaveBeenCalledTimes( 1 );
             expect( spy1 ).toHaveBeenCalledWith( source, args, context );
             expect( spy2 ).toHaveBeenCalledTimes( 0 );
             expect( spy3 ).toHaveBeenCalledTimes( 0 );
         } );
+
+        expect( p ).rejects.toEqual( { "middleware": "MiddlewareC", "reason": false } );
     } )
 
     it( 'should call the resolver with the correct parameters, if source param is not used', () => {

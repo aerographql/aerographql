@@ -18,7 +18,7 @@ export function Middleware() {
  * Interface that need to be implemented be every Middleware
  */
 export interface BaseMiddleware<T=any> {
-    execute( src: any, args: any, context: Context ): T | Promise<T>;
+    execute( src: any, args: any, context: Context, options: any ): T | Promise<T>;
 }
 
 class MiddlewareError {
@@ -69,11 +69,8 @@ export let createMiddlewareSequence = ( middlewares: MiddlewareDescriptor[], inj
             if ( !context ) context = {};
             if ( !context.middlewareResults ) context.middlewareResults = {};
 
-            // Assign current middleware options
-            context.middlewareOptions = mwDesc.options;
-
             // Call the middleware
-            let rv = Reflect.apply( executeFunction, mwInstance, [ source, args, context ] );
+            let rv = Reflect.apply( executeFunction, mwInstance, [ source, args, context, mwDesc.options ] );
 
             let providerName = mwDesc.provider.name;
 
@@ -81,9 +78,6 @@ export let createMiddlewareSequence = ( middlewares: MiddlewareDescriptor[], inj
             if ( isPromise( rv ) ) {
                 // If return is a promise
                 return rv.then( result => {
-                    // Reset mw option
-                    delete context.middlewareOptions;
-
                     // If result must be stored
                     if ( mwDesc.resultName ) {
                         if ( !context.middlewareResults[ mwDesc.resultName ] ) context.middlewareResults[ mwDesc.resultName ] = [];
@@ -92,15 +86,10 @@ export let createMiddlewareSequence = ( middlewares: MiddlewareDescriptor[], inj
 
                     return result;
                 }, reason => {
-                    // Reset mw option
-                    delete context.middlewareOptions;
                     // Wrap the rejected value in a Middleware error that will be later on throw.
                     return Promise.reject( new MiddlewareError( providerName, reason ) );
                 } );
             } else {
-                // Reset mw option
-                delete context.middlewareOptions;
-
                 // If result must be stored
                 if ( rv ) {
                     if ( mwDesc.resultName ) {

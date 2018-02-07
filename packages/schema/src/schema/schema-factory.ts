@@ -7,7 +7,7 @@ import { FactoryContext } from '../shared';
 import { unionFactory } from '../union';
 import { interfaceFactory } from '../interface';
 import { inputFactory } from '../input-object';
-import { objectTypeFactory, ObjectImplementationMetaObject, ObjectDefinitionMetaObject} from '../object';
+import { objectTypeFactory, ObjectImplementationMetaObject, ObjectDefinitionMetaObject } from '../object';
 
 
 export let schemaFactory = function ( anyDef: SchemaMetaObject | Function, context: FactoryContext ) {
@@ -20,24 +20,16 @@ export let schemaFactory = function ( anyDef: SchemaMetaObject | Function, conte
     let components = classifyComponents( schemaMetaObject.components );
 
     // Create interfaces
-    components.interfaces.forEach( interf => {
-        interfaceFactory( interf, context );
-    } );
+    components.interfaces.forEach( interf => { interfaceFactory( interf, context ); } );
 
     // Create unions
-    components.unions.forEach( union => {
-        unionFactory( union, context );
-    } );
+    components.unions.forEach( union => { unionFactory( union, context ); } );
 
     // Then Input objects
-    components.inputObject.forEach( input => {
-        inputFactory( input, context );
-    } );
+    components.inputObject.forEach( input => { inputFactory( input, context ); } );
 
     // Then scalar
-    components.scalar.forEach( scalar => {
-        scalarFactory( scalar, context );
-    } );
+    components.scalar.forEach( scalar => { scalarFactory( scalar, context ); } );
 
     type FullTypeMetaObjects = { [ key: string ]: { def: Function[], impl: Function[] } };
     // Classify every definition by their type name

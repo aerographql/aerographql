@@ -76,7 +76,6 @@ export class FactoryContext {
 */
 export interface Context {
     middlewareResults?: { [ key: string ]: any };
-    middlewareOptions?: any;
 }
 
 

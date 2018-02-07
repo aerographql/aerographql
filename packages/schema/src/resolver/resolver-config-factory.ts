@@ -92,7 +92,8 @@ export let resolverConfigFactory = function ( metaObject: ResolverMetaObject, fi
         let p = executeAsyncFunctionSequentialy( middlewareSequence, [ source, args, context ] );
 
         return p.then( results => {
-            return Reflect.apply( resolveFunction, instance, expandedArgs );
+            let p = Reflect.apply( resolveFunction, instance, expandedArgs );
+            return p;
         }, ( error ) => {
             // Throw error, so it will be catched by the graphql layer
             throw error;

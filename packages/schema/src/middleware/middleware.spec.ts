@@ -5,8 +5,9 @@ import { FactoryContext, Context } from '../shared';
 import { createMiddlewareSequence, MiddlewareDescriptor, Middleware, BaseMiddleware } from './middleware';
 
 describe( 'createMiddlewareSequence function', () => {
+
     let createInjector = ( providers: Function[] ) => {
-        return Injector.resolveAndCreate( providers  );
+        return Injector.resolveAndCreate( providers );
     };
 
     let cloneObject = ( obj: any ) => {
@@ -28,7 +29,7 @@ describe( 'createMiddlewareSequence function', () => {
         let spy = jest.fn();
         @Middleware()
         class MA implements BaseMiddleware<string> {
-            execute( src: any, args: any, context: Context ) { spy( context.middlewareOptions ); return 'A'; }
+            execute( src: any, args: any, context: Context, options: any ) { spy( options ); return 'A'; }
         }
         let descs: MiddlewareDescriptor[] = [ { provider: MA, options: 'Options' } ];
 
@@ -48,17 +49,17 @@ describe( 'createMiddlewareSequence function', () => {
         @Middleware()
         class MA implements BaseMiddleware<string> {
 
-            execute( src: any, args: any, context: Context ) { spyA( cloneObject( context ) ); return 'A'; }
+            execute( src: any, args: any, context: Context, options: any ) { spyA( [ cloneObject( context ), cloneObject( options ) ] ); return 'A'; }
         }
 
         @Middleware()
         class MB implements BaseMiddleware<string> {
-            execute( src: any, args: any, context: Context ) { spyB( cloneObject( context ) ); return 'B'; }
+            execute( src: any, args: any, context: Context, options: any ) { spyB( [ cloneObject( context ), cloneObject( options ) ] ); return 'B'; }
         }
 
         @Middleware()
         class MC implements BaseMiddleware<string> {
-            execute( src: any, args: any, context: Context ) { spyC( cloneObject( context ) ); return 'C'; }
+            execute( src: any, args: any, context: Context, options: any ) { spyC( [ cloneObject( context ), cloneObject( options ) ] ); return 'C'; }
         }
 
         let descs: MiddlewareDescriptor[] = [
@@ -72,11 +73,56 @@ describe( 'createMiddlewareSequence function', () => {
 
         expect( result ).toEqual( [ "A", "B", "C" ] );
         expect( spyA ).toHaveBeenCalledTimes( 1 );
-        expect( spyA ).toHaveBeenCalledWith( { middlewareResults: {}, middlewareOptions: 'OptionsA' } );
+        expect( spyA ).toHaveBeenCalledWith( [ { middlewareResults: {} }, 'OptionsA' ] );
         expect( spyB ).toHaveBeenCalledTimes( 1 );
-        expect( spyB ).toHaveBeenCalledWith( { middlewareResults: { A: [ "A" ] }, middlewareOptions: 'OptionsB' } );
+        expect( spyB ).toHaveBeenCalledWith( [ { middlewareResults: { A: [ "A" ] } }, 'OptionsB' ] );
         expect( spyC ).toHaveBeenCalledTimes( 1 );
-        expect( spyC ).toHaveBeenCalledWith( { middlewareResults: { A: [ "A" ], B: [ "B" ] }, middlewareOptions: 'OptionsC' } );
+        expect( spyC ).toHaveBeenCalledWith( [ { middlewareResults: { A: [ "A" ], B: [ "B" ] } }, 'OptionsC' ] );
     } );
 
+    it( 'should handle sync error correctly', () => {
+
+        let spyA = jest.fn();
+
+        @Middleware()
+        class MA implements BaseMiddleware<boolean> {
+            execute( src: any, args: any, context: Context, options: any ) { spyA( [ cloneObject( context ), cloneObject( options ) ] ); return false; }
+        }
+
+        let descs: MiddlewareDescriptor[] = [
+            { provider: MA, options: 'OptionsA', resultName: 'A' }
+        ];
+
+        let s = createMiddlewareSequence( descs, createInjector( [ MA ] ) );
+        let result = executeAsyncFunctionSequentialy( s, [ null, null, {} ] ).then( () => {
+            expect( spyA ).toHaveBeenCalledTimes( 1 );
+            expect( spyA ).toHaveBeenCalledWith( [ { middlewareResults: {} }, 'OptionsA' ] );
+        } );
+
+        expect( result ).rejects.toEqual( { middleware: "MA", reason: false } );
+
+    } );
+
+    it( 'should handle async error correctly', () => {
+
+        let spyA = jest.fn();
+
+        @Middleware()
+        class MA implements BaseMiddleware<boolean> {
+            execute( src: any, args: any, context: Context, options: any ) { spyA( [ cloneObject( context ), cloneObject( options ) ] ); return Promise.reject( 'rejectValue' ); }
+        }
+
+        let descs: MiddlewareDescriptor[] = [
+            { provider: MA, options: 'OptionsA', resultName: 'A' }
+        ];
+
+        let s = createMiddlewareSequence( descs, createInjector( [ MA ] ) );
+        let result = executeAsyncFunctionSequentialy( s, [ null, null, {} ] ).then( () => {
+            expect( spyA ).toHaveBeenCalledTimes( 1 );
+            expect( spyA ).toHaveBeenCalledWith( [ { middlewareResults: {} }, 'OptionsA' ] );
+        } );
+
+        expect( result ).rejects.toEqual( { middleware: "MA", reason: 'rejectValue' } );
+
+    } );
 } );
