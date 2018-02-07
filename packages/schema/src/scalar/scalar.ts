@@ -30,8 +30,8 @@ export function Scalar( config: ScalarConfig ) {
  * Interface each scalar implementation should implement
  */
 export interface ScalarInterface {
-    parseValue: ( value: string ) => any;
-    serialize: ( value: Date | string ) => any;
+    parseValue: ( value: any ) => any;
+    serialize: ( value: any ) => any;
     parseLiteral: ( ast: ASTNode ) => any;
 }
 

@@ -42,19 +42,19 @@ describe( '@ObjectDefinition decorator', () => {
         expect( mo.implements ).toHaveLength( 0 );
     } );
     it( 'should set the correct fields metadata', () => {
-        let md = getMetaObject<ObjectDefinitionMetaObject>( TypeB );
+        let mo = getMetaObject<ObjectDefinitionMetaObject>( TypeB );
 
-        expect( md.fields ).toHaveProperty( 'fieldA' );
-        expect( md.fields[ 'fieldA' ].nullable ).toBe( false );
-        expect( md.fields[ 'fieldA' ].list ).toBe( false );
-        expect( md.fields[ 'fieldA' ].type ).toBe( 'Int' );
-        expect( md.fields[ 'fieldA' ].description ).toBeNull();
+        expect( mo.fields ).toHaveProperty( 'fieldA' );
+        expect( mo.fields[ 'fieldA' ].nullable ).toBe( false );
+        expect( mo.fields[ 'fieldA' ].list ).toBe( false );
+        expect( mo.fields[ 'fieldA' ].type ).toBe( 'Int' );
+        expect( mo.fields[ 'fieldA' ].description ).toBeNull();
 
-        expect( md.fields ).toHaveProperty( 'fieldB' );
-        expect( md.fields[ 'fieldB' ].nullable ).toBe( false );
-        expect( md.fields[ 'fieldB' ].list ).toBe( true );
-        expect( md.fields[ 'fieldB' ].type ).toBe( 'Float' );
-        expect( md.fields[ 'fieldB' ].description ).toBeNull();
+        expect( mo.fields ).toHaveProperty( 'fieldB' );
+        expect( mo.fields[ 'fieldB' ].nullable ).toBe( false );
+        expect( mo.fields[ 'fieldB' ].list ).toBe( true );
+        expect( mo.fields[ 'fieldB' ].type ).toBe( 'Float' );
+        expect( mo.fields[ 'fieldB' ].description ).toBeNull();
     } );
 } );
 

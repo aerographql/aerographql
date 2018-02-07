@@ -11,7 +11,7 @@ import { ObjectDefinitionMetaObject } from '../object';
 /**
  * Arg defintion
  */
-export function Arg( config: ArgConfig = { nullable: false } ) {
+export function Arg( config: ArgConfig = { nullable: false, list: false } ) {
 
     return function ( target: any, fieldName: string, index: number ): void {
         let classArgMap = ensureMetadata<ArgsMetaObjectMap>( META_KEY_ARGS_MAP, target.constructor, {} );
@@ -29,7 +29,7 @@ export function Arg( config: ArgConfig = { nullable: false } ) {
 
         let paramTypes: any[] = Reflect.getMetadata( META_KEY_DESIGN_PARAMSTYPES, target, fieldName );
 
-        let list = false;
+        let list = !!config.list;
         let inferedType = paramTypes[ index ];
         if ( inferedType && inferedType.name === 'Array' ) {
             list = true;
@@ -68,13 +68,14 @@ export function Arg( config: ArgConfig = { nullable: false } ) {
 }
 
 export interface ArgConfig {
-    nullable?: Boolean
-    type?: string | Function
+    nullable?: boolean;
+    list?: boolean;
+    type?: string | Function;
 }
 
 export interface ArgMetaObject {
     type: string;
-    nullable: Boolean;
+    nullable: boolean;
     index: number;
     list: boolean;
 }

@@ -74,7 +74,6 @@ export function Resolver( config: ResolverConfig ): MethodDecorator {
 }
 
 export interface ResolverConfig {
-    name?: string,
     type?: string | Function,
     nullable?: boolean,
     list?: boolean,
