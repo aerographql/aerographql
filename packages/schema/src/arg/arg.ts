@@ -83,17 +83,21 @@ export type ArgsMetaObject = { [ key: string ]: ArgMetaObject };
 export type ArgsMetaObjectMap = { [ key: string ]: ArgsMetaObject };
 
 export function getArgsMetaObject( target: any, fieldName: string ) {
-    let fieldArgsMetadataMap: ArgsMetaObjectMap = Reflect.getMetadata( META_KEY_ARGS_MAP, target );
+    let fieldArgsMetadataMap: ArgsMetaObjectMap = getArgsMetaObjectMap( target );
 
-    let fieldArgsMetadata: ArgsMetaObject = {}
+    let fieldArgsMetadata: ArgsMetaObject = {};
     if ( fieldArgsMetadataMap && fieldArgsMetadataMap[ fieldName ] )
         fieldArgsMetadata = fieldArgsMetadataMap[ fieldName ];
 
     return fieldArgsMetadata;
 }
 
-export function getArgsMetaObjectMap( target: any ) {
+/**
+ * Return a map where each entry is a field on the passed target and where each of these field contain 
+ * a map associating an arguments name to it's meta object
+ * @param target 
+ */
+export function getArgsMetaObjectMap( target: Function ) {
     let classArgMap: ArgsMetaObjectMap = Reflect.getMetadata( META_KEY_ARGS_MAP, target );
-
     return classArgMap;
 }

@@ -3,7 +3,7 @@ import {
     GraphQLInputObjectType, GraphQLResolveInfo
 } from 'graphql';
 import {
-    getMetaObject, getMetaObjectType,
+    getMetaObject, getMetaObjectType, Middleware,
     METAOBJECT_TYPES, TestBed, Injector
 } from 'aerographql-core';
 import { ObjectDefinition, ObjectDefinitionMetaObject } from './object-definition';
@@ -12,7 +12,6 @@ import { InputObject, InputObjectMetaObject, inputFactory } from '../input-objec
 import { Field } from '../field';
 import { Resolver } from '../resolver';
 import { Arg } from '../arg';
-import { Middleware } from '../middleware';
 import { FactoryContext } from '../shared';
 import { ServerMock } from '../test-utils';
 import { objectTypeFactory } from './object-factory';
@@ -31,23 +30,18 @@ describe( '@ObjectDefinition decorator', () => {
     }
 
     it( 'should set the correct metadata', () => {
-        expect( getMetaObject( TypeA ) ).not.toBeNull();
-
         let mo = getMetaObject<ObjectDefinitionMetaObject>( TypeA );
         expect( mo.name ).toBe( 'TypeA' );
         expect( mo.fields ).toEqual( {} );
         expect( mo.implements ).toHaveLength( 0 );
     } );
     it( 'should set the correct default name when not specified', () => {
-        expect( getMetaObject( TypeB ) ).not.toBeNull();
-
         let mo = getMetaObject<ObjectDefinitionMetaObject>( TypeB );
         expect( mo.name ).toBe( 'TypeB' );
         expect( mo.description ).toBeNull();
         expect( mo.implements ).toHaveLength( 0 );
     } );
     it( 'should set the correct fields metadata', () => {
-        expect( getMetaObject( TypeB ) ).not.toBeNull();
         let md = getMetaObject<ObjectDefinitionMetaObject>( TypeB );
 
         expect( md.fields ).toHaveProperty( 'fieldA' );
@@ -79,6 +73,8 @@ describe( '@ObjectImplementation decorator', () => {
         expect( mo.name ).toBe( 'TypeA' );
         expect( mo.description ).toBe( 'Desc' );
         expect( mo.implements ).toHaveLength( 2 );
+        expect( mo.implements ).toContain( IA );
+        expect( mo.implements ).toContain( IB );
     } );
     it( 'should correctly handle empty implements array', () => {
         expect( getMetaObject( TypeImplB ) ).toBeDefined();
@@ -91,25 +87,6 @@ describe( '@ObjectImplementation decorator', () => {
     } );
 } );
 
-describe( '@Arg decorator', () => {
-    @ObjectImplementation( {
-        name: 'TypeB'
-    } )
-    class TypeImplB1 {
-        @Resolver( { type: 'TypeA' } )
-        resolverA( src: any, @Arg() arg1: number ) { }
-    }
-
-    it( 'should set the correct metadata', () => {
-        expect( getMetaObject( TypeImplB1 ) ).not.toBeNull();
-
-        let md = getMetaObject<ObjectImplementationMetaObject>( TypeImplB1 );
-        expect( md.resolvers.resolverA.args ).toHaveProperty( 'arg1' );
-        expect( md.resolvers.resolverA.args.arg1.index ).toBe( 1 );
-        expect( md.resolvers.resolverA.args.arg1.nullable ).toBe( false );
-        expect( md.resolvers.resolverA.args.arg1.type ).toBe( 'Int' );
-    } );
-} );
 
 describe( 'objectTypeFactory function', () => {
 
@@ -121,7 +98,7 @@ describe( 'objectTypeFactory function', () => {
     @Middleware()
     class MA {
         execute() {
-            ( this as any )[ 'execute' ].callIndex = callIndex++;
+            ( this as any ).execute.callIndex = callIndex++;
             return 'MiddlewareAReturn';
         }
     }
@@ -129,7 +106,7 @@ describe( 'objectTypeFactory function', () => {
     @Middleware()
     class MB {
         execute() {
-            ( this as any )[ 'execute' ].callIndex = callIndex++;
+            ( this as any ).execute.callIndex = callIndex++;
             return Promise.resolve( 'MiddlewareBReturn' );
         }
     }
@@ -137,7 +114,7 @@ describe( 'objectTypeFactory function', () => {
     @Middleware()
     class MC {
         execute( source: any, args: any, context: any ) {
-            ( this as any )[ 'execute' ].callIndex = callIndex++;
+            ( this as any ).execute.callIndex = callIndex++;
             return !args.input.errored;
         }
     }
@@ -296,7 +273,7 @@ describe( 'objectTypeFactory function', () => {
                 expect( ( spy1 as any ).callIndex ).toBeLessThan( ( spy2 as any ).callIndex );
                 return result;
             } );
-            expect( p ).resolves.toBe( 'ResolverAReturn');
+            expect( p ).resolves.toBe( 'ResolverAReturn' );
         } );
 
         it( 'should stop on middleware error', () => {

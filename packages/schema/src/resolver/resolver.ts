@@ -1,13 +1,12 @@
 
 import 'reflect-metadata';
 import {
-    Provider,
+    Provider, MiddlewareDescriptor,
     META_KEY_RESOLVERS_MAP, METAOBJECT_TYPES,
     META_KEY_DESIGN_RETURNTYPE, isOfMetaObjectType, getMetaObject, convertTypeFromTsToGraphQL, ensureMetadata
 } from 'aerographql-core';
 import { ArgsMetaObject, getArgsMetaObject } from '../arg';
 import { ObjectDefinitionMetaObject } from '../object';
-import { MiddlewareDescriptor } from '../middleware';
 
 /**
  * Field Implementation decorator

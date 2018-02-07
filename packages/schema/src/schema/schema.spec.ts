@@ -1,4 +1,4 @@
-import { Injector, getMetaObject, Injectable } from 'aerographql-core';
+import { Injector, getMetaObject, Injectable, Middleware } from 'aerographql-core';
 import { GraphQLSchema } from 'graphql';
 
 import { Schema, SchemaMetaObject, getSchemaProviders } from './schema';
@@ -9,7 +9,6 @@ import { Interface } from '../interface';
 import { schemaFactory } from './schema-factory';
 import { FactoryContext } from '../shared';
 import { ServerMock } from '../test-utils';
-import { Middleware } from '../middleware';
 import { Resolver } from '../resolver';
 
 

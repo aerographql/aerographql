@@ -2,9 +2,8 @@ import {
     GraphQLSchema, GraphQLObjectType, GraphQLScalarType, GraphQLNonNull, GraphQLList,
     GraphQLInputObjectType, GraphQLResolveInfo
 } from 'graphql';
-import { TestBed, inject, Injector, getMetaObject } from 'aerographql-core';
+import { TestBed, inject, Injector, getMetaObject, Middleware } from 'aerographql-core';
 import { FactoryContext } from '../shared';
-import { Middleware } from '../middleware';
 import { schemaFactory } from './schema-factory';
 import { InputObject, InputObjectMetaObject } from '../input-object';
 import { ObjectDefinition, ObjectDefinitionMetaObject, ObjectImplementation } from '../object';

@@ -1,8 +1,9 @@
 
-import { getMetaObject, executeAsyncFunctionSequentialy, Injector } from 'aerographql-core';
+import {
+    createMiddlewareSequence, MiddlewareDescriptor, Middleware, BaseMiddleware,
+    getMetaObject, executeAsyncFunctionSequentialy, Injector
+} from 'aerographql-core';
 
-import { FactoryContext } from '../shared';
-import { createMiddlewareSequence, MiddlewareDescriptor, Middleware, BaseMiddleware } from './middleware';
 
 describe( 'createMiddlewareSequence function', () => {
 
@@ -68,15 +69,15 @@ describe( 'createMiddlewareSequence function', () => {
         ];
 
         let s = createMiddlewareSequence( descs, createInjector( [ MA, MB, MC ] ) );
-        let result = executeAsyncFunctionSequentialy( s, [ null, null, {} ] ).then( (result ) => {
+        let result = executeAsyncFunctionSequentialy( s, [ null, null, {} ] ).then( ( result ) => {
             expect( spyA ).toHaveBeenCalledTimes( 1 );
-            expect( spyA ).toHaveBeenCalledWith( [ {} , 'OptionsA' ] );
+            expect( spyA ).toHaveBeenCalledWith( [ {}, 'OptionsA' ] );
             expect( spyB ).toHaveBeenCalledTimes( 1 );
-            expect( spyB ).toHaveBeenCalledWith( [{ A: [ "A" ] }, 'OptionsB' ] );
+            expect( spyB ).toHaveBeenCalledWith( [ { A: [ "A" ] }, 'OptionsB' ] );
             expect( spyC ).toHaveBeenCalledTimes( 1 );
-            expect( spyC ).toHaveBeenCalledWith( [{ A: [ "A" ], B: [ "B" ] }, 'OptionsC' ] );
+            expect( spyC ).toHaveBeenCalledWith( [ { A: [ "A" ], B: [ "B" ] }, 'OptionsC' ] );
             return result;
-        });
+        } );
 
         return expect( result ).resolves.toEqual( [ "A", "B", "C" ] );
     } );
@@ -97,7 +98,7 @@ describe( 'createMiddlewareSequence function', () => {
         let s = createMiddlewareSequence( descs, createInjector( [ MA ] ) );
         let result = executeAsyncFunctionSequentialy( s, [ null, null, {} ] ).then( () => {
             expect( spyA ).toHaveBeenCalledTimes( 1 );
-            expect( spyA ).toHaveBeenCalledWith( [  {} , 'OptionsA' ] );
+            expect( spyA ).toHaveBeenCalledWith( [ {}, 'OptionsA' ] );
         } );
 
         expect( result ).rejects.toEqual( { middleware: "MA", reason: false } );

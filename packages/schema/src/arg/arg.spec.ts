@@ -23,51 +23,51 @@ describe( '@Arg decorator', () => {
         ) { }
     }
 
-    let md: ArgsMetaObjectMap;
+    let mo: ArgsMetaObjectMap;
 
     beforeEach( () => {
-        md = getArgsMetaObjectMap( TypeA );
+        mo = getArgsMetaObjectMap( TypeA );
     } )
     it( 'should add args map metadata', () => {
-        expect( md ).not.toBeNull();
-        expect( md.fieldA ).not.toBeUndefined();
-        expect( md ).toHaveProperty( 'fieldA' );
+        expect( mo ).not.toBeNull();
+        expect( mo.fieldA ).not.toBeUndefined();
+        expect( mo ).toHaveProperty( 'fieldA' );
     } )
 
     it( 'should set the correct metadata for number', () => {
-        expect( md.fieldA ).toHaveProperty( 'arg1' );
-        expect( md.fieldA.arg1.index ).toBe( 1 );
-        expect( md.fieldA.arg1.type ).toBe( 'Int' );
-        expect( md.fieldA.arg1.nullable ).toBe( false );
+        expect( mo.fieldA ).toHaveProperty( 'arg1' );
+        expect( mo.fieldA.arg1.index ).toBe( 1 );
+        expect( mo.fieldA.arg1.type ).toBe( 'Int' );
+        expect( mo.fieldA.arg1.nullable ).toBe( false );
     } );
 
     it( 'should set the correct metadata for boolean', () => {
-        expect( md.fieldA ).toHaveProperty( 'arg2' );
-        expect( md.fieldA.arg2.index ).toBe( 2 );
-        expect( md.fieldA.arg2.type ).toBe( 'Boolean' );
-        expect( md.fieldA.arg2.nullable ).toBe( false );
+        expect( mo.fieldA ).toHaveProperty( 'arg2' );
+        expect( mo.fieldA.arg2.index ).toBe( 2 );
+        expect( mo.fieldA.arg2.type ).toBe( 'Boolean' );
+        expect( mo.fieldA.arg2.nullable ).toBe( false );
     } );
 
     it( 'should set the correct metadata for string', () => {
-        expect( md.fieldA ).toHaveProperty( 'arg3' );
-        expect( md.fieldA.arg3.index ).toBe( 3 );
-        expect( md.fieldA.arg3.type ).toBe( 'String' );
-        expect( md.fieldA.arg3.nullable ).toBe( false );
+        expect( mo.fieldA ).toHaveProperty( 'arg3' );
+        expect( mo.fieldA.arg3.index ).toBe( 3 );
+        expect( mo.fieldA.arg3.type ).toBe( 'String' );
+        expect( mo.fieldA.arg3.nullable ).toBe( false );
     } );
 
     it( 'should set set correct type if overloaded', () => {
-        expect( md.fieldA ).toHaveProperty( 'arg4' );
-        expect( md.fieldA.arg4.index ).toBe( 4 );
-        expect( md.fieldA.arg4.type ).toBe( 'ID' );
-        expect( md.fieldA.arg4.nullable ).toBe( false );
+        expect( mo.fieldA ).toHaveProperty( 'arg4' );
+        expect( mo.fieldA.arg4.index ).toBe( 4 );
+        expect( mo.fieldA.arg4.type ).toBe( 'ID' );
+        expect( mo.fieldA.arg4.nullable ).toBe( false );
     } );
 
     it( 'should set set correct type for list', () => {
-        expect( md.fieldA ).toHaveProperty( 'arg5' );
-        expect( md.fieldA.arg5.index ).toBe( 5 );
-        expect( md.fieldA.arg4.type ).toBe( 'ID' );
-        expect( md.fieldA.arg5.nullable ).toBe( false );
-        expect( md.fieldA.arg5.list ).toBe( true );
+        expect( mo.fieldA ).toHaveProperty( 'arg5' );
+        expect( mo.fieldA.arg5.index ).toBe( 5 );
+        expect( mo.fieldA.arg4.type ).toBe( 'ID' );
+        expect( mo.fieldA.arg5.nullable ).toBe( false );
+        expect( mo.fieldA.arg5.list ).toBe( true );
     } );
 
     it( 'should throw if arg is list and type was not explicitly specified', () => {
@@ -82,26 +82,26 @@ describe( '@Arg decorator', () => {
     } );
 
     it( 'should correclty resolve type when using Class as an implicit type', () => {
-        expect( md.fieldA ).toHaveProperty( 'arg6' );
-        expect( md.fieldA.arg6.index ).toBe( 6 );
-        expect( md.fieldA.arg6.type ).toBe( getMetaObject(TypeDef1).name );
-        expect( md.fieldA.arg6.nullable ).toBe( false );
-        expect( md.fieldA.arg6.list ).toBe( false );
+        expect( mo.fieldA ).toHaveProperty( 'arg6' );
+        expect( mo.fieldA.arg6.index ).toBe( 6 );
+        expect( mo.fieldA.arg6.type ).toBe( getMetaObject(TypeDef1).name );
+        expect( mo.fieldA.arg6.nullable ).toBe( false );
+        expect( mo.fieldA.arg6.list ).toBe( false );
     } );
 
     it( 'should correclty resolve type when using Class as an explicit type', () => {
-        expect( md.fieldA ).toHaveProperty( 'arg7' );
-        expect( md.fieldA.arg7.index ).toBe( 7 );
-        expect( md.fieldA.arg7.type ).toBe( getMetaObject(TypeDef1).name );
-        expect( md.fieldA.arg7.nullable ).toBe( false );
-        expect( md.fieldA.arg7.list ).toBe( true );
+        expect( mo.fieldA ).toHaveProperty( 'arg7' );
+        expect( mo.fieldA.arg7.index ).toBe( 7 );
+        expect( mo.fieldA.arg7.type ).toBe( getMetaObject(TypeDef1).name );
+        expect( mo.fieldA.arg7.nullable ).toBe( false );
+        expect( mo.fieldA.arg7.list ).toBe( true );
     } );
 
     it( 'should correclty resolve type when using AeroGraphQL core Types as explicit type', () => {
-        expect( md.fieldA ).toHaveProperty( 'arg8' );
-        expect( md.fieldA.arg8.index ).toBe( 8 );
-        expect( md.fieldA.arg8.type ).toBe( 'ID' );
-        expect( md.fieldA.arg8.nullable ).toBe( false );
-        expect( md.fieldA.arg8.list ).toBe( false );
+        expect( mo.fieldA ).toHaveProperty( 'arg8' );
+        expect( mo.fieldA.arg8.index ).toBe( 8 );
+        expect( mo.fieldA.arg8.type ).toBe( 'ID' );
+        expect( mo.fieldA.arg8.nullable ).toBe( false );
+        expect( mo.fieldA.arg8.list ).toBe( false );
     } );
 } );

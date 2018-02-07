@@ -2,11 +2,10 @@
 import 'reflect-metadata';
 import {
     Provider,
-    META_KEY_METAOBJECT, META_KEY_RESOLVERS_MAP, METAOBJECT_TYPES,
+    META_KEY_METAOBJECT, META_KEY_RESOLVERS_MAP, METAOBJECT_TYPES, MiddlewareDescriptor,
     META_KEY_METAOBJECT_TYPE, getFunctionParametersName, META_KEY_DESIGN_PARAMSTYPES, META_KEY_ARGS_MAP,
     META_KEY_DESIGN_TYPE, isOfMetaObjectType, getMetaObject, convertTypeFromTsToGraphQL, ensureMetadata, getMetaObjectType
 } from 'aerographql-core';
-import { MiddlewareDescriptor } from '../middleware';
 import { ResolverMetaObjectMap } from '../resolver';
 import { ArgsMetaObject, getArgsMetaObject } from '../arg';
 import { InterfaceMetaObject } from '../interface';

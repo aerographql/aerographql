@@ -1,10 +1,9 @@
 import { GraphQLFieldConfig, GraphQLNonNull, GraphQLList } from 'graphql';
-import { isPromise, executeAsyncFunctionSequentialy } from 'aerographql-core';
+import { BaseMiddleware, createMiddlewareSequence, isPromise, executeAsyncFunctionSequentialy } from 'aerographql-core';
 
 import { ObjectDefinitionMetaObject } from '../object';
 import { ResolverMetaObject } from './resolver';
 import { FactoryContext } from '../shared';
-import { BaseMiddleware, createMiddlewareSequence } from '../middleware';
 
 export let resolverConfigFactory = function ( metaObject: ResolverMetaObject, fieldName: string, factoryContext: FactoryContext ) {
     let fieldConfig: GraphQLFieldConfig<any, any> = {
