@@ -7,7 +7,8 @@ import { ObjectDefinition, ObjectImplementation, objectTypeFactory } from '../ob
 import { Scalar } from '../scalar';
 import { Interface } from '../interface';
 import { schemaFactory } from './schema-factory';
-import { FactoryContext, ServerMock } from '../shared';
+import { FactoryContext } from '../shared';
+import { ServerMock } from '../test-utils';
 import { Middleware } from '../middleware';
 import { Resolver } from '../resolver';
 

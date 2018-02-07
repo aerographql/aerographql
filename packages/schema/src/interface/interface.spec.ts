@@ -5,7 +5,8 @@ import { interfaceFactory } from './interface-factory';
 import { ObjectDefinition, ObjectImplementation } from '../object';
 import { Resolver } from '../resolver';
 import { Schema, BaseSchema } from '../schema';
-import { FactoryContext, ServerMock } from '../shared';
+import { FactoryContext } from '../shared';
+import { ServerMock } from '../test-utils';
 import { Field } from '../field';
 
 
