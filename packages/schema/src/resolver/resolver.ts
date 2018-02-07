@@ -3,7 +3,7 @@ import 'reflect-metadata';
 import {
     Provider,
     META_KEY_RESOLVERS_MAP, METAOBJECT_TYPES,
-    META_KEY_DESIGN_TYPE, isOfMetaObjectType, getMetaObject, convertTypeFromTsToGraphQL, ensureMetadata
+    META_KEY_DESIGN_RETURNTYPE, isOfMetaObjectType, getMetaObject, convertTypeFromTsToGraphQL, ensureMetadata
 } from 'aerographql-core';
 import { ArgsMetaObject, getArgsMetaObject } from '../arg';
 import { ObjectDefinitionMetaObject } from '../object';
@@ -25,8 +25,8 @@ export function Resolver( config: ResolverConfig ): MethodDecorator {
         if ( config.list !== undefined ) {
             list = config.list;
         } else {
-            let t = Reflect.getMetadata( META_KEY_DESIGN_TYPE, target, resolverName );
-            if ( t.name === 'Array' ) list = true;
+            let t = Reflect.getMetadata( META_KEY_DESIGN_RETURNTYPE, target, resolverName );
+            if ( t && t.name === 'Array' ) list = true;
         }
 
         // Extract instance token
@@ -37,9 +37,9 @@ export function Resolver( config: ResolverConfig ): MethodDecorator {
         if ( typeof config.type === "function" ) {
             if ( isOfMetaObjectType( config.type, METAOBJECT_TYPES.scalar ) ||
                 isOfMetaObjectType( config.type, METAOBJECT_TYPES.interface ) ||
-                isOfMetaObjectType( config.type, METAOBJECT_TYPES.objectDefinition )  ||
-                isOfMetaObjectType( config.type, METAOBJECT_TYPES.union )) {
-                    
+                isOfMetaObjectType( config.type, METAOBJECT_TYPES.objectDefinition ) ||
+                isOfMetaObjectType( config.type, METAOBJECT_TYPES.union ) ) {
+
                 let m = getMetaObject( config.type ) as any;
                 type = m.name;
             } else {

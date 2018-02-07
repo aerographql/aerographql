@@ -41,14 +41,13 @@ describe( 'createMiddlewareSequence function', () => {
         expect( spy ).toHaveBeenCalledWith( 'Options' );
     } );
 
-    it( 'should work with multiple middleware', async () => {
+    it( 'should work with multiple middleware', () => {
 
         let spyA = jest.fn();
         let spyB = jest.fn();
         let spyC = jest.fn();
         @Middleware()
         class MA implements BaseMiddleware<string> {
-
             execute( src: any, args: any, context: Context, options: any ) { spyA( [ cloneObject( context ), cloneObject( options ) ] ); return 'A'; }
         }
 
@@ -69,15 +68,17 @@ describe( 'createMiddlewareSequence function', () => {
         ];
 
         let s = createMiddlewareSequence( descs, createInjector( [ MA, MB, MC ] ) );
-        let result = await executeAsyncFunctionSequentialy( s, [ null, null, {} ] );
+        let result = executeAsyncFunctionSequentialy( s, [ null, null, {} ] ).then( (result ) => {
+            expect( spyA ).toHaveBeenCalledTimes( 1 );
+            expect( spyA ).toHaveBeenCalledWith( [ { middlewareResults: {} }, 'OptionsA' ] );
+            expect( spyB ).toHaveBeenCalledTimes( 1 );
+            expect( spyB ).toHaveBeenCalledWith( [ { middlewareResults: { A: [ "A" ] } }, 'OptionsB' ] );
+            expect( spyC ).toHaveBeenCalledTimes( 1 );
+            expect( spyC ).toHaveBeenCalledWith( [ { middlewareResults: { A: [ "A" ], B: [ "B" ] } }, 'OptionsC' ] );
+            return result;
+        });
 
-        expect( result ).toEqual( [ "A", "B", "C" ] );
-        expect( spyA ).toHaveBeenCalledTimes( 1 );
-        expect( spyA ).toHaveBeenCalledWith( [ { middlewareResults: {} }, 'OptionsA' ] );
-        expect( spyB ).toHaveBeenCalledTimes( 1 );
-        expect( spyB ).toHaveBeenCalledWith( [ { middlewareResults: { A: [ "A" ] } }, 'OptionsB' ] );
-        expect( spyC ).toHaveBeenCalledTimes( 1 );
-        expect( spyC ).toHaveBeenCalledWith( [ { middlewareResults: { A: [ "A" ], B: [ "B" ] } }, 'OptionsC' ] );
+        return expect( result ).resolves.toEqual( [ "A", "B", "C" ] );
     } );
 
     it( 'should handle sync error correctly', () => {

@@ -8,6 +8,7 @@ export const META_KEY_COLLECTION = "dtmb:collection";
 
 export const META_KEY_DESIGN_PARAMSTYPES = "design:paramtypes";
 export const META_KEY_DESIGN_TYPE = "design:type";
+export const META_KEY_DESIGN_RETURNTYPE = "design:returntype";
 
 export enum METAOBJECT_TYPES {
     interface = 'Interface',

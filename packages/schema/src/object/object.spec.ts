@@ -293,8 +293,9 @@ describe( 'objectTypeFactory function', () => {
                 expect( spy2 ).toHaveBeenCalledTimes( 1 );
                 expect( spy2 ).toHaveBeenCalledWith( source, args, context, "MwOptions" );
                 expect( ( spy1 as any ).callIndex ).toBeLessThan( ( spy2 as any ).callIndex );
+                return result;
             } );
-            expect( p ).resolves.toBeUndefined();
+            expect( p ).resolves.toBe( 'ResolverAReturn');
         } );
 
         it( 'should stop on middleware error', () => {
