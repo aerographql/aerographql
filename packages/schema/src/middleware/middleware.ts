@@ -3,7 +3,6 @@ import {
     META_KEY_METAOBJECT_TYPE, METAOBJECT_TYPES, Injector,
     deduplicateArray, getMetaObjectType, isPromise, executeAsyncFunctionSequentialy
 } from 'aerographql-core';
-import { Context } from '../shared';
 
 /**
  * Middleware decorator
@@ -18,7 +17,7 @@ export function Middleware() {
  * Interface that need to be implemented be every Middleware
  */
 export interface BaseMiddleware<T=any> {
-    execute( src: any, args: any, context: Context, options: any ): T | Promise<T>;
+    execute( src: any, args: any, context: any, options: any ): T | Promise<T>;
 }
 
 class MiddlewareError {
@@ -38,7 +37,7 @@ export interface MiddlewareDescriptor {
     resultName?: string;
 }
 
-type MiddlewareResolver = ( src: any, args: any, context: Context ) => Promise<any>;
+type MiddlewareResolver = ( src: any, args: any, context: any ) => Promise<any>;
 
 /**
  * Convert a list of Mw descriptor into a list of Function wrapping the AeroGraphQL behavior for middleware.
@@ -63,12 +62,10 @@ export let createMiddlewareSequence = ( middlewares: MiddlewareDescriptor[], inj
             throw new Error( `No execute function found in middleware  "${mwDesc.provider}"` );
         }
 
-        let closure = ( source: any, args: any, context: Context ) => {
+        let closure = ( source: any, args: any, context: any ) => {
 
             // Normalize context
             if ( !context ) context = {};
-            if ( !context.middlewareResults ) context.middlewareResults = {};
-
             // Call the middleware
             let rv = Reflect.apply( executeFunction, mwInstance, [ source, args, context, mwDesc.options ] );
 
@@ -80,8 +77,8 @@ export let createMiddlewareSequence = ( middlewares: MiddlewareDescriptor[], inj
                 return rv.then( result => {
                     // If result must be stored
                     if ( mwDesc.resultName ) {
-                        if ( !context.middlewareResults[ mwDesc.resultName ] ) context.middlewareResults[ mwDesc.resultName ] = [];
-                        context.middlewareResults[ mwDesc.resultName ].push( result );
+                        if ( !context[ mwDesc.resultName ] ) context[ mwDesc.resultName ] = [];
+                        context[ mwDesc.resultName ].push( result );
                     }
 
                     return result;
@@ -93,9 +90,9 @@ export let createMiddlewareSequence = ( middlewares: MiddlewareDescriptor[], inj
                 // If result must be stored
                 if ( rv ) {
                     if ( mwDesc.resultName ) {
-                        if ( !context.middlewareResults[ mwDesc.resultName ] )
-                            context.middlewareResults[ mwDesc.resultName ] = [];
-                        context.middlewareResults[ mwDesc.resultName ].push( rv );
+                        if ( !context[ mwDesc.resultName ] )
+                            context[ mwDesc.resultName ] = [];
+                        context[ mwDesc.resultName ].push( rv );
                     }
 
                     return Promise.resolve( rv );

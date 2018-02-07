@@ -184,7 +184,7 @@ describe( 'When used from an express middleware, Schema', () => {
             expect( gqlResponse.data ).toBeDefined();
             expect( gqlResponse.data.query ).toBe( 28 );
             expect( response.statusCode ).toBe( 200 );
-            expect( RootQueryImplA.spy ).toBeCalledWith( { "middlewareResults": {} } );
+            expect( RootQueryImplA.spy ).toBeCalledWith(  {} );
             done();
         } );
     } )
@@ -202,7 +202,7 @@ describe( 'When used from an express middleware, Schema', () => {
             expect( gqlResponse.data.query ).toBe( 28 );
             expect( response.statusCode ).toBe( 200 );
             expect( RootQueryImplA.spy ).toBeCalled();
-            expect( RootQueryImplA.spy ).toBeCalledWith( { "middlewareResults": {}, "value1": "value1" } )
+            expect( RootQueryImplA.spy ).toBeCalledWith( { "value1": "value1" } )
             done();
         } );
     } );

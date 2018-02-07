@@ -3,7 +3,7 @@ import { isPromise, executeAsyncFunctionSequentialy } from 'aerographql-core';
 
 import { ObjectDefinitionMetaObject } from '../object';
 import { ResolverMetaObject } from './resolver';
-import { Context, FactoryContext } from '../shared';
+import { FactoryContext } from '../shared';
 import { BaseMiddleware, createMiddlewareSequence } from '../middleware';
 
 export let resolverConfigFactory = function ( metaObject: ResolverMetaObject, fieldName: string, factoryContext: FactoryContext ) {
@@ -52,7 +52,7 @@ export let resolverConfigFactory = function ( metaObject: ResolverMetaObject, fi
 
     // Create a closure that wrap the call to middleware and the resolver.
     // provide the argument in the correct way
-    fieldConfig.resolve = ( source: any, args: any, context: Context ) => {
+    fieldConfig.resolve = ( source: any, args: any, context: any ) => {
         
         // Build the middleware chain
         let middlewareSequence = createMiddlewareSequence( metaObject.middlewares, factoryContext.injector );
@@ -86,7 +86,6 @@ export let resolverConfigFactory = function ( metaObject: ResolverMetaObject, fi
 
         // 
         if ( !context ) context = {};
-        if ( !context.middlewareResults ) context.middlewareResults = {};
 
         // Execute each middleware sequentialy
         let p = executeAsyncFunctionSequentialy( middlewareSequence, [ source, args, context ] );

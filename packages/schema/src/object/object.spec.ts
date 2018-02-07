@@ -307,7 +307,7 @@ describe( 'objectTypeFactory function', () => {
             // Fake call on the resolver (this is done by the graphql runtime)
             let source = {}
             let args = { input: { errored: true } };
-            let context = { middlewareResults: {} };
+            let context = {};
             let options: any = undefined;
             let p = resovlerA.resolve( source, args, context, null ).then( () => {
                 expect( spy1 ).toHaveBeenCalledTimes( 1 );
@@ -362,7 +362,7 @@ describe( 'objectTypeFactory function', () => {
                 resovlerC.resolve( source, args, context, null ).then( ( result: any ) => {
                     expect( result ).toBe( 'ResolverCReturn' );
                     expect( spy ).toHaveBeenCalledTimes( 1 );
-                    expect( spy ).toHaveBeenCalledWith( source, args.input, { middlewareResults: { A: [ 'MiddlewareAReturn' ], B: [ 'MiddlewareBReturn' ] } } )
+                    expect( spy ).toHaveBeenCalledWith( source, args.input, { A: [ 'MiddlewareAReturn' ], B: [ 'MiddlewareBReturn' ] } )
                 } );
             } );
 
@@ -377,7 +377,7 @@ describe( 'objectTypeFactory function', () => {
                 resovlerA.resolve( source, args, context, null ).then( ( result: any ) => {
                     expect( result ).toBe( 'ResolverAReturn' );
                     expect( spy ).toHaveBeenCalledTimes( 1 );
-                    expect( spy ).toHaveBeenCalledWith( args.input, { middlewareResults: { C: [ true ], B: [ 'MiddlewareBReturn' ] } } )
+                    expect( spy ).toHaveBeenCalledWith( args.input, { C: [ true ], B: [ 'MiddlewareBReturn' ] } )
                 } );
             } );
         } );

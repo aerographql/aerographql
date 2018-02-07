@@ -69,14 +69,6 @@ export class FactoryContext {
 }
 
 /** 
- * GraphQL context passed to each resolvers
-*/
-export interface Context {
-    middlewareResults?: { [ key: string ]: any };
-}
-
-
-/** 
  * Default method to resolve type for union and interface is to check the metadata available on the value conestructor, if any.
  * If this approach is not enough, you can enhance it by providing a custom ResolveTypeFunction, which must
  * provide the right analyze and return the right type name

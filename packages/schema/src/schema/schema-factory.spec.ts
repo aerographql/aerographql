@@ -3,7 +3,7 @@ import {
     GraphQLInputObjectType, GraphQLResolveInfo
 } from 'graphql';
 import { TestBed, inject, Injector, getMetaObject } from 'aerographql-core';
-import { Context, FactoryContext } from '../shared';
+import { FactoryContext } from '../shared';
 import { Middleware } from '../middleware';
 import { schemaFactory } from './schema-factory';
 import { InputObject, InputObjectMetaObject } from '../input-object';
