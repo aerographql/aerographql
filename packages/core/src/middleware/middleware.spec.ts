@@ -1,7 +1,7 @@
 
 import {
     createMiddlewareSequence, MiddlewareDescriptor, Middleware, BaseMiddleware,
-    getMetaObject, executeAsyncFunctionSequentialy, Injector, 
+    getMetaObject, executeAsyncFunctionSequentialy, Injector,
 } from 'aerographql-core';
 
 
@@ -42,6 +42,51 @@ describe( 'createMiddlewareSequence function', () => {
         expect( spy ).toHaveBeenCalledWith( 'Options' );
     } );
 
+
+    it( 'should store middlewares results with the same name in an array ', () => {
+        @Middleware()
+        class MA implements BaseMiddleware<string> {
+            execute( src: any, args: any, context: any, options: any ) { return 'A'; }
+        }
+        @Middleware()
+        class MB implements BaseMiddleware<string> {
+            execute( src: any, args: any, context: any, options: any ) { return 'B'; }
+        }
+        let descs: MiddlewareDescriptor[] = [
+            { provider: MA, options: 'OptionsA', resultName: 'A' },
+            { provider: MB, options: 'OptionsB', resultName: 'A' }
+        ];
+        let s = createMiddlewareSequence( descs, createInjector( [ MA, MB ] ) );
+        let context: any = {};
+        let result = executeAsyncFunctionSequentialy( s, [ null, null, context ] ).then( ( result: any ) => {
+            expect( context ).toEqual( { A: [ 'A', 'B' ] } );
+            return result;
+        } );
+        return expect( result ).resolves.toEqual( [ "A", "B" ] );
+    } );
+
+    it( 'should store middlewares results with the different name directly in the context ', () => {
+        @Middleware()
+        class MA implements BaseMiddleware<string> {
+            execute( src: any, args: any, context: any, options: any ) { return 'A'; }
+        }
+        @Middleware()
+        class MB implements BaseMiddleware<string> {
+            execute( src: any, args: any, context: any, options: any ) { return 'B'; }
+        }
+        let descs: MiddlewareDescriptor[] = [
+            { provider: MA, options: 'OptionsA', resultName: 'A' },
+            { provider: MB, options: 'OptionsB', resultName: 'B' }
+        ];
+        let s = createMiddlewareSequence( descs, createInjector( [ MA, MB ] ) );
+        let context: any = {};
+        let result = executeAsyncFunctionSequentialy( s, [ null, null, context ] ).then( ( result: any ) => {
+            expect( context ).toEqual( { A: 'A', B: 'B' } );
+            return result;
+        } );
+        return expect( result ).resolves.toEqual( [ "A", "B" ] );
+    } );
+
     it( 'should work with multiple middleware', () => {
 
         let spyA = jest.fn();
@@ -73,9 +118,9 @@ describe( 'createMiddlewareSequence function', () => {
             expect( spyA ).toHaveBeenCalledTimes( 1 );
             expect( spyA ).toHaveBeenCalledWith( [ {}, 'OptionsA' ] );
             expect( spyB ).toHaveBeenCalledTimes( 1 );
-            expect( spyB ).toHaveBeenCalledWith( [ { A: [ "A" ] }, 'OptionsB' ] );
+            expect( spyB ).toHaveBeenCalledWith( [ { A: "A" }, 'OptionsB' ] );
             expect( spyC ).toHaveBeenCalledTimes( 1 );
-            expect( spyC ).toHaveBeenCalledWith( [ { A: [ "A" ], B: [ "B" ] }, 'OptionsC' ] );
+            expect( spyC ).toHaveBeenCalledWith( [ { A: "A", B: "B" }, 'OptionsC' ] );
             return result;
         } );
 
@@ -134,7 +179,7 @@ describe( 'createMiddlewareSequence function', () => {
 
         @Middleware()
         class MA implements BaseMiddleware<any> {
-            execute( src: any, args: any, context: any, options: any ) { spyA( [ cloneObject( context ), cloneObject( options ) ] ); throw new Error('errorValue'); }
+            execute( src: any, args: any, context: any, options: any ) { spyA( [ cloneObject( context ), cloneObject( options ) ] ); throw new Error( 'errorValue' ); }
         }
 
         let descs: MiddlewareDescriptor[] = [

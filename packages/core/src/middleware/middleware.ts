@@ -62,6 +62,20 @@ export let createMiddlewareSequence = ( middlewares: MiddlewareDescriptor[], inj
             throw new Error( `No execute function found in middleware  "${mwDesc.provider}"` );
         }
 
+        let storeResult = ( result: any, context: any, field: string ) => {
+            if ( !context[ field ] ) {
+                context[ field ] = result;
+            }
+            else {
+                if ( Array.isArray( context[ field ] ) ) {
+                    context[ field ].push( result );
+                } else {
+                    let firstResult = context[ field ];
+                    context[ field ] = [ firstResult, result ];
+                }
+            }
+        };
+
         let closure = ( source: any, args: any, context: any ) => {
 
             let providerName = mwDesc.provider.name;
@@ -86,8 +100,7 @@ export let createMiddlewareSequence = ( middlewares: MiddlewareDescriptor[], inj
                 return rv.then( result => {
                     // If result must be stored
                     if ( mwDesc.resultName ) {
-                        if ( !context[ mwDesc.resultName ] ) context[ mwDesc.resultName ] = [];
-                        context[ mwDesc.resultName ].push( result );
+                        storeResult( result, context, mwDesc.resultName );
                     }
 
                     return result;
@@ -99,9 +112,7 @@ export let createMiddlewareSequence = ( middlewares: MiddlewareDescriptor[], inj
                 // If result must be stored
                 if ( rv ) {
                     if ( mwDesc.resultName ) {
-                        if ( !context[ mwDesc.resultName ] )
-                            context[ mwDesc.resultName ] = [];
-                        context[ mwDesc.resultName ].push( rv );
+                        storeResult( rv, context, mwDesc.resultName );
                     }
 
                     return Promise.resolve( rv );

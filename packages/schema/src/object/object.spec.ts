@@ -339,7 +339,7 @@ describe( 'objectTypeFactory function', () => {
                 resovlerC.resolve( source, args, context, null ).then( ( result: any ) => {
                     expect( result ).toBe( 'ResolverCReturn' );
                     expect( spy ).toHaveBeenCalledTimes( 1 );
-                    expect( spy ).toHaveBeenCalledWith( source, args.input, { A: [ 'MiddlewareAReturn' ], B: [ 'MiddlewareBReturn' ] } )
+                    expect( spy ).toHaveBeenCalledWith( source, args.input, { A: 'MiddlewareAReturn', B: 'MiddlewareBReturn' } )
                 } );
             } );
 
@@ -354,7 +354,7 @@ describe( 'objectTypeFactory function', () => {
                 resovlerA.resolve( source, args, context, null ).then( ( result: any ) => {
                     expect( result ).toBe( 'ResolverAReturn' );
                     expect( spy ).toHaveBeenCalledTimes( 1 );
-                    expect( spy ).toHaveBeenCalledWith( args.input, { C: [ true ], B: [ 'MiddlewareBReturn' ] } )
+                    expect( spy ).toHaveBeenCalledWith( args.input, { C: true, B: 'MiddlewareBReturn' } )
                 } );
             } );
         } );
