@@ -64,12 +64,21 @@ export let createMiddlewareSequence = ( middlewares: MiddlewareDescriptor[], inj
 
         let closure = ( source: any, args: any, context: any ) => {
 
+            let providerName = mwDesc.provider.name;
+
             // Normalize context
             if ( !context ) context = {};
-            // Call the middleware
-            let rv = Reflect.apply( executeFunction, mwInstance, [ source, args, context, mwDesc.options ] );
 
-            let providerName = mwDesc.provider.name;
+            // Call the middleware
+            let rv: any;
+            try {
+                rv = Reflect.apply( executeFunction, mwInstance, [ source, args, context, mwDesc.options ] );
+            } catch ( reason ) {
+                let o = reason;
+                if ( reason.message ) o = reason.message;
+
+                return Promise.reject( new MiddlewareError( providerName, o ) );
+            }
 
             // Normalize middleware return value to always return a promise
             if ( isPromise( rv ) ) {

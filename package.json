@@ -9,6 +9,7 @@
     },
     "dependencies": {
         "coveralls": "^3.0.0",
+        "graphql": "~0.12.0",
         "jest": "^22.1.4"
     }
 }

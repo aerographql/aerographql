@@ -1,7 +1,7 @@
 
 import {
     createMiddlewareSequence, MiddlewareDescriptor, Middleware, BaseMiddleware,
-    getMetaObject, executeAsyncFunctionSequentialy, Injector
+    getMetaObject, executeAsyncFunctionSequentialy, Injector, 
 } from 'aerographql-core';
 
 
@@ -125,6 +125,29 @@ describe( 'createMiddlewareSequence function', () => {
         } );
 
         expect( result ).rejects.toEqual( { middleware: "MA", reason: 'rejectValue' } );
+
+    } );
+
+    it( 'should handle exception error correctly', () => {
+
+        let spyA = jest.fn();
+
+        @Middleware()
+        class MA implements BaseMiddleware<any> {
+            execute( src: any, args: any, context: any, options: any ) { spyA( [ cloneObject( context ), cloneObject( options ) ] ); throw new Error('errorValue'); }
+        }
+
+        let descs: MiddlewareDescriptor[] = [
+            { provider: MA, options: 'OptionsA', resultName: 'A' }
+        ];
+
+        let s = createMiddlewareSequence( descs, createInjector( [ MA ] ) );
+        let result = executeAsyncFunctionSequentialy( s, [ null, null, {} ] ).then( () => {
+            expect( spyA ).toHaveBeenCalledTimes( 1 );
+            expect( spyA ).toHaveBeenCalledWith( [ {}, 'OptionsA' ] );
+        } );
+
+        expect( result ).rejects.toEqual( { middleware: "MA", reason: 'errorValue' } );
 
     } );
 } );
