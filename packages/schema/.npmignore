@@ -2,3 +2,4 @@ index.ts
 src
 coverage
 node_modules
+jest.config.js
