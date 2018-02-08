@@ -8,3 +8,5 @@ export * from './field';
 export * from './arg';
 export * from './resolver';
 export * from './shared';
+// Re export 
+export * from 'aerographql-core';
