@@ -15,6 +15,6 @@
         "outDir": "./dist"
     },
     "include": [
-        "./packages/**/src/**/*.ts"
+        "./src/**/*.ts"
     ]
 }

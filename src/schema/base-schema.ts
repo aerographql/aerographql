@@ -1,0 +1,33 @@
+import { GraphQLSchema, printSchema } from 'graphql';
+
+import {  Injector } from '../di';
+import { FactoryContext, getMetaObject } from '../shared';
+import { SchemaMetaObject, getSchemaProviders } from './schema';
+import {schemaFactory, } from './schema-factory';
+ 
+
+/**
+ * Base class from which any AeroGraphQL Schema must derive
+ */
+export class BaseSchema {
+
+    rootInjector: Injector;
+    graphQLSchema: GraphQLSchema;
+
+    constructor() {
+
+        let ctr = this[ 'constructor' ];
+
+        this.rootInjector = Injector.resolveAndCreate( [
+            ...getSchemaProviders( ctr )
+        ] );
+
+        let factoryContext = new FactoryContext( this.rootInjector );
+        this.graphQLSchema = schemaFactory( ctr, factoryContext );
+    }
+
+    toString() {
+        return printSchema( this.graphQLSchema );
+    }
+
+}
