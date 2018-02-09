@@ -137,15 +137,9 @@ export class Injector {
 
         if ( typeof provider === "function" ) {
             token = provider.name;
-            if ( !token ) {
-                throw new Error( 'Injectable does not have metadata' );
-            }
             factory = provider;
             value = null
         } else {
-            if ( !provider.token )
-                throw new Error( 'Invalid provider, undefined token' )
-
             if ( !provider.factory && !provider.value )
                 throw new Error( 'Invalid provider, neither factory of value was provided' )
 

@@ -1,13 +1,14 @@
 import {
     GraphQLSchema, GraphQLObjectType, GraphQLScalarType, GraphQLNonNull, GraphQLList
 } from 'graphql';
+
 import { Injector, Inject } from '../di';
 import { getMetaObject, FactoryContext } from '../shared';
 import { schemaFactory, Schema } from '../schema';
 import { InputObject, InputObjectMetaObject } from '../input-object';
 import { ObjectDefinition, ObjectDefinitionMetaObject } from '../object';
 import { Field } from './field';
-
+import { fieldConfigFactory } from './field-config-factory';
 
 
 describe( '@Field decorator', () => {
@@ -129,5 +130,18 @@ describe( 'fieldConfigFactory function', () => {
         expect( fieldDType.ofType ).toBeInstanceOf( GraphQLList );
         expect( fieldDType.ofType.ofType ).toBeInstanceOf( GraphQLObjectType );
     } );
+
+
+    it( 'should throw if type is invalid ', () => {
+
+        @ObjectDefinition( )
+        class TypeA {
+            @Field() fieldA: any;
+        }
+        let f = new FactoryContext( Injector.resolveAndCreate([]) );
+        let mo = getMetaObject<ObjectDefinitionMetaObject>( TypeA );
+
+        expect( () => fieldConfigFactory( mo.fields.fieldA, f ) ).toThrow();
+    })
 
 } );
