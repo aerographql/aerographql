@@ -4,5 +4,7 @@ node_js:
 cache: yarn
 script:
   - yarn test --coverage
+  before_install:
+    - npm i -g graphql
 after_success: 
   - cat ./coverage/lcov.info | ./node_modules/.bin/coveralls

@@ -33,7 +33,6 @@
         "Tools"
     ],
     "peerDependencies": {
-        "reflect-metadata": "^0.1.10",
         "graphql": ">= 0.9.0"
     },
     "devDependencies": {
@@ -46,5 +45,9 @@
         "node-mocks-http": "^1.6.6",
         "ts-jest": "^22.0.2",
         "typescript": "^2.6.2"
+    },
+    "dependencies": {
+        "graphql": "^0.13.0",
+        "reflect-metadata": "^0.1.12"
     }
 }
