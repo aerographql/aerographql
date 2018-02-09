@@ -6,7 +6,7 @@ import { ObjectDefinition, ObjectImplementation } from '../object';
 import { Resolver } from '../resolver';
 import { Schema, BaseSchema } from '../schema';
 import { FactoryContext } from '../shared';
-import { ServerMock } from '../test-utils';
+import { TestServer } from '../test';
 import { Field } from '../field';
 
 
@@ -143,53 +143,30 @@ describe( 'When used from an express middleware, Interface', () => {
     class TestSchema extends BaseSchema {
     }
 
-
-    let response: ServerMock.Response;
-    let middleware: ServerMock.Middleware;
     let schema: TestSchema;
 
     beforeEach( () => {
         schema = new TestSchema();
-        response = ServerMock.createResponse();
         RootQuery.spy = jest.fn();
-        middleware = ServerMock.createMiddleware( schema );
     } )
 
-    it( 'should work with polymorphic types1', ( done ) => {
-        let request = ServerMock.createRequest( `{ query1 { fieldA fieldB ... on TestType1 { fieldC } } }` );
-
-        middleware( request, response, null );
-        response.on( 'end', () => {
-            var gqlResponse = JSON.parse( response._getData() );
-            expect( gqlResponse.data.query1 ).toEqual( { fieldA: 0, fieldB: "String", fieldC: "String" } );
-            expect( response.statusCode ).toBe( 200 );
-            done();
-        } );
+    it( 'should work with polymorphic types1', () => {
+        let s = new TestServer( schema );
+        let q = `{ query1 { fieldA fieldB ... on TestType1 { fieldC } } }`
+        return expect( s.execute( q ) ).resolves.toEqual( { data: { query1: { fieldA: 0, fieldB: "String", fieldC: "String" } } } );
     } )
 
-    it( 'should work with polymorphic types2', ( done ) => {
-        let request = ServerMock.createRequest( `{ query2 { fieldA fieldB ... on TestType2 { fieldD } } }` );
-
-        middleware( request, response, null );
-        response.on( 'end', () => {
-            var gqlResponse = JSON.parse( response._getData() );
-            expect( gqlResponse.data.query2 ).toEqual( { fieldA: 0, fieldB: "String", fieldD: 1 } );
-            expect( response.statusCode ).toBe( 200 );
-            done();
-        } );
+    it( 'should work with polymorphic types2', () => {
+        let s = new TestServer( schema );
+        let q = `{ query2 { fieldA fieldB ... on TestType2 { fieldD } } }`
+        return expect( s.execute( q ) ).resolves.toEqual( { data: { query2: { fieldA: 0, fieldB: "String", fieldD: 1 } } } );
     } )
 
-    it( 'should error when type resolution is not possible', ( done ) => {
-        let request = ServerMock.createRequest( `{ query3 { fieldA fieldB } }` );
+    it( 'should error when type resolution is not possible', () => {
+        let s = new TestServer( schema );
+        let q = `{ query3 { fieldA fieldB } }`
+        return expect( s.execute( q ) ).resolves.toHaveProperty( 'errors' );
 
-        middleware( request, response, null );
-        response.on( 'end', () => {
-            var gqlResponse = JSON.parse( response._getData() );
-            expect( gqlResponse.data ).toBeNull();
-            expect( gqlResponse.errors ).toHaveLength( 1 );
-            expect( response.statusCode ).toBe( 200 );
-            done();
-        } );
     } )
 } );
 

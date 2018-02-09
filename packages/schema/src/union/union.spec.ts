@@ -6,7 +6,7 @@ import { ObjectDefinition, ObjectImplementation, objectTypeFactory } from '../ob
 import { Resolver } from '../resolver';
 import { Schema, BaseSchema } from '../schema';
 import { FactoryContext } from '../shared';
-import { ServerMock } from '../test-utils';
+import { TestServer } from '../test';
 import { Field } from '../field';
 
 describe( '@Union decorator', () => {
@@ -99,27 +99,19 @@ describe( 'When used from an express middleware, Union', () => {
     @Schema( { rootQuery: 'RootQuery', components: [ RootQueryA, UnionA, ObjectA, ObjectB ] } )
     class SchemaA extends BaseSchema { }
 
-    let response: ServerMock.Response;
-    let middleware: ServerMock.Middleware;
     let schema: SchemaA;
 
     beforeEach( () => {
         schema = new SchemaA();
-        response = ServerMock.createResponse();
         RootQueryA.spy = jest.fn();
-        middleware = ServerMock.createMiddleware( schema );
     } )
 
-    it( 'should work with polymorphic types1', ( done ) => {
-        let request = ServerMock.createRequest( `{ query1 { ... on ObjectA { fieldA fieldB } } }` );
-
-        middleware( request, response, null );
-        response.on( 'end', () => {
-            var gqlResponse = JSON.parse( response._getData() );
-            expect( gqlResponse.data.query1 ).toEqual( { fieldA: 0, fieldB: 1 } );
-            expect( response.statusCode ).toBe( 200 );
-            done();
-        } );
+    it( 'should work with polymorphic types1', () => {
+        let s = new TestServer( schema );
+        let p = s.execute( `{ query1 { ... on ObjectA { fieldA fieldB } } }` ).then( (r) => {
+            return r;
+        });
+        return expect( p ).resolves.toEqual( { data: { query1: { fieldA: 0, fieldB: 1 } } } )
     } )
 
 } )

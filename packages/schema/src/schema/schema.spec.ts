@@ -8,7 +8,7 @@ import { Scalar } from '../scalar';
 import { Interface } from '../interface';
 import { schemaFactory } from './schema-factory';
 import { FactoryContext } from '../shared';
-import { ServerMock } from '../test-utils';
+import { TestServer } from '../test';
 import { Resolver } from '../resolver';
 
 
@@ -162,48 +162,31 @@ describe( 'When used from an express middleware, Schema', () => {
     @Schema( { rootQuery: 'RootQuery', components: [ RootQueryImplA ] } )
     class SchemaA extends BaseSchema { }
 
-    let response: ServerMock.Response;
     let schema: SchemaA;
 
     beforeEach( () => {
         schema = new SchemaA();
-        response = ServerMock.createResponse();
         RootQueryImplA.spy = jest.fn();
     } )
 
-    it( 'should work with simple query', ( done ) => {
-
-        let middleware = ServerMock.createMiddleware( schema );
-        let request = ServerMock.createRequest( "{ query  }" );
-
-        middleware( request, response, null );
-
-        response.on( 'end', () => {
-            var gqlResponse = JSON.parse( response._getData() );
-            expect( gqlResponse.data ).toBeDefined();
-            expect( gqlResponse.data.query ).toBe( 28 );
-            expect( response.statusCode ).toBe( 200 );
-            expect( RootQueryImplA.spy ).toBeCalledWith(  {} );
-            done();
+    it( 'should work with simple query', () => {
+        let s = new TestServer( schema );
+        let p = s.execute( "{ query  }" ).then( (r) => {
+            expect( RootQueryImplA.spy ).toBeCalledWith( {} );
+            return r;
         } );
+        return expect( p ).resolves.toEqual( { data: { query: 28 } } )
     } )
 
-    it( 'should work with simple query and additional context values', ( done ) => {
+    it( 'should work with simple query and additional context values', () => {
 
-        let middleware = ServerMock.createMiddleware( schema, { value1: 'value1' } );
-        let request = ServerMock.createRequest( "{ query  }" );
-
-        middleware( request, response, null );
-
-        response.on( 'end', () => {
-            var gqlResponse = JSON.parse( response._getData() );
-            expect( gqlResponse.data ).toBeDefined();
-            expect( gqlResponse.data.query ).toBe( 28 );
-            expect( response.statusCode ).toBe( 200 );
-            expect( RootQueryImplA.spy ).toBeCalled();
-            expect( RootQueryImplA.spy ).toBeCalledWith( { "value1": "value1" } )
-            done();
+        let s = new TestServer( schema, { value1: 'value1' } );
+        let p = s.execute( "{ query  }" ).then( (r) => {
+            expect( RootQueryImplA.spy ).toBeCalledWith( { value1: 'value1' } );
+            return r;
         } );
+        return expect( p ).resolves.toEqual( { data: { query: 28 } } )
+
     } );
 } );
 

@@ -13,7 +13,7 @@ import { Field } from '../field';
 import { Resolver } from '../resolver';
 import { Arg } from '../arg';
 import { FactoryContext } from '../shared';
-import { ServerMock } from '../test-utils';
+import { TestServer } from '../test';
 import { objectTypeFactory } from './object-factory';
 import { Schema, BaseSchema } from '../schema';
 import { Interface, interfaceFactory } from '../interface';
@@ -386,27 +386,16 @@ describe( 'When used from an express middleware, Object', () => {
     class TestSchema extends BaseSchema {
     }
 
-    let response: ServerMock.Response;
     let schema: TestSchema;
-    let middleware: ServerMock.Middleware;
 
     beforeEach( () => {
         schema = new TestSchema();
-        response = ServerMock.createResponse();
-        middleware = ServerMock.createMiddleware( schema );
         TestRootQuery.spy = jest.fn();
     } )
 
-    it( 'should work with simple query', ( done ) => {
-        let request = ServerMock.createRequest( `{ query1 { fieldA fieldB  } }` );
-
-        middleware( request, response, null );
-        response.on( 'end', () => {
-            var gqlResponse = JSON.parse( response._getData() );
-            expect( gqlResponse.data.query1 ).toEqual( { fieldA: 0, fieldB: "String" } );
-            expect( response.statusCode ).toBe( 200 );
-            done();
-        } );
+    it( 'should work with simple query', () => {
+        let s = new TestServer( schema );
+        return expect( s.execute( `{ query1 { fieldA fieldB  } }` ) ).resolves.toEqual( { data: { query1: { fieldA: 0, fieldB: "String" } } } )
     } )
 
 } )
