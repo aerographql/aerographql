@@ -5,6 +5,6 @@ cache: yarn
 script:
   - yarn test --coverage
 before_install:
-  - yarn global add graphql
+  - yarn add graphql
 after_success: 
   - cat ./coverage/lcov.info | ./node_modules/.bin/coveralls
