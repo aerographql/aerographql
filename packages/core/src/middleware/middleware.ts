@@ -1,8 +1,10 @@
 import 'reflect-metadata';
+import { Injector } from '../di';
+
 import {
-    META_KEY_METAOBJECT_TYPE, METAOBJECT_TYPES, Injector,
-    deduplicateArray, getMetaObjectType, isPromise, executeAsyncFunctionSequentialy
-} from 'aerographql-core';
+    META_KEY_METAOBJECT_TYPE, METAOBJECT_TYPES,
+    deduplicateArray, getMetaObjectType, isPromise
+} from '../shared';
 
 /**
  * Middleware decorator
@@ -39,6 +41,22 @@ export interface MiddlewareDescriptor {
 
 type MiddlewareResolver = ( src: any, args: any, context: any ) => Promise<any>;
 
+
+let storeResultInContext = ( result: any, context: any, field: string ) => {
+    if ( !context[ field ] ) {
+        context[ field ] = result;
+    }
+    else {
+        if ( Array.isArray( context[ field ] ) ) {
+            context[ field ].push( result );
+        } else {
+            let firstResult = context[ field ];
+            context[ field ] = [ firstResult, result ];
+        }
+    }
+};
+
+
 /**
  * Convert a list of Mw descriptor into a list of Function wrapping the AeroGraphQL behavior for middleware.
  * Those functions will take care of setting the options for the each MW and store MW results appropriatly in the Context
@@ -61,20 +79,6 @@ export let createMiddlewareSequence = ( middlewares: MiddlewareDescriptor[], inj
         if ( !executeFunction ) {
             throw new Error( `No execute function found in middleware  "${mwDesc.provider}"` );
         }
-
-        let storeResult = ( result: any, context: any, field: string ) => {
-            if ( !context[ field ] ) {
-                context[ field ] = result;
-            }
-            else {
-                if ( Array.isArray( context[ field ] ) ) {
-                    context[ field ].push( result );
-                } else {
-                    let firstResult = context[ field ];
-                    context[ field ] = [ firstResult, result ];
-                }
-            }
-        };
 
         let closure = ( source: any, args: any, context: any ) => {
 
@@ -100,7 +104,7 @@ export let createMiddlewareSequence = ( middlewares: MiddlewareDescriptor[], inj
                 return rv.then( result => {
                     // If result must be stored
                     if ( mwDesc.resultName ) {
-                        storeResult( result, context, mwDesc.resultName );
+                        storeResultInContext( result, context, mwDesc.resultName );
                     }
 
                     return result;
@@ -112,7 +116,7 @@ export let createMiddlewareSequence = ( middlewares: MiddlewareDescriptor[], inj
                 // If result must be stored
                 if ( rv ) {
                     if ( mwDesc.resultName ) {
-                        storeResult( rv, context, mwDesc.resultName );
+                        storeResultInContext( rv, context, mwDesc.resultName );
                     }
 
                     return Promise.resolve( rv );

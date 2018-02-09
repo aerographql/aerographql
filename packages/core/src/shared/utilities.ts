@@ -1,12 +1,26 @@
+/**
+ * Check whether an input object is a Promise or not
+ * @param obj 
+ */
 export let isPromise = function ( obj: any ): obj is Promise<any> {
     return !!obj && ( typeof obj === 'object' || typeof obj === 'function' ) && typeof obj.then === 'function';
 };
 
+/** 
+ * Define and async functions
+*/
+export type AscynFunction<T> = ( ...args: any[] ) => Promise<T>;
 
-export async function executeAsyncFunctionSequentialy<T extends Function >( funcs: T[], params: any[] = [] ) {
+/**
+ * Execute a list of async function sequentially:
+ * Run the first function, wait for the promise it return to resolve and then run the secnd one.
+ * @param funcs List of function
+ * @param params parameters passed to each async function
+ */
+export async function executeAsyncFunctionSequentialy<T>( funcs: AscynFunction<T>[], params: any[] = [] ) {
     return funcs.reduce( ( promise, func ) => {
         return promise.then( results => {
-            return func( ...params ).then( ( result: any ) => {
+            return func( ...params ).then( result => {
                 return results.concat( result )
             } )
         } )
@@ -46,6 +60,9 @@ export function ensureMetadata<T>( key: string, target: any, defaultValue: any )
  * @param func The function to examine
  */
 export function getFunctionParametersName( func: Function ) {
+    if ( typeof func !== 'function' )
+        return [];
+        
     // First match everything inside the function argument parens.
     let funStr = func.toString();
     let params = funStr.slice( funStr.indexOf( '(' ) + 1, funStr.indexOf( ')' ) ).match( /([^\s,]+)/g );
