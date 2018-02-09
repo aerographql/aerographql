@@ -2,13 +2,13 @@ import { MiddlewareDescriptor, createMiddlewareSequence } from '../middleware';
 import { Provider, Injector } from '../di';
 import { executeAsyncFunctionSequentialy } from '../shared';
 
-export interface MwArgs {
+export interface ExecuteMiddlewaresArgs {
     source?: any;
     args?: any;
     context?: any
 }
 
-export let executeMiddlewares = ( descs: MiddlewareDescriptor[], args: MwArgs = {}, additionalProviders: ( Function | Provider )[] = [] ) => {
+export function executeMiddlewares( descs: MiddlewareDescriptor[], args: ExecuteMiddlewaresArgs = {}, additionalProviders: ( Function | Provider )[] = [] ): Promise<any[]> {
 
     let realArgs = Object.assign( { source: null, args: null, context: null }, args );
     // Build a list of providers needed to run this mw.
@@ -20,7 +20,7 @@ export let executeMiddlewares = ( descs: MiddlewareDescriptor[], args: MwArgs = 
     return executeAsyncFunctionSequentialy( s, [ realArgs.source, realArgs.args, realArgs.context ] );
 }
 
-export let createInjectable = ( ctr: Function, additionalProviders: ( Function | Provider )[] = [] ) => {
+export function createInjectable<T=any>( ctr: Function, additionalProviders: ( Function | Provider )[] = [] ): T {
 
     let providers = additionalProviders.slice();
     providers.push( ctr );

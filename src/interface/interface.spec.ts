@@ -164,7 +164,6 @@ describe( 'When used from an express middleware, Interface', () => {
         let s = new TestServer( schema );
         let q = `{ query3 { fieldA fieldB } }`
         return expect( s.execute( q ) ).resolves.toHaveProperty( 'errors' );
-
     } )
 } );
 

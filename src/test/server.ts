@@ -13,7 +13,7 @@ export class TestServer {
         this.handler = graphqlExpress( { schema: schema.graphQLSchema, context: context } );
     }
 
-    execute( query: string, vars: any = null, operationName: string = null ) {
+    execute<T=any>( query: string, vars: any = null, operationName: string = null ): Promise<T> {
 
         return new Promise( ( resolve, reject ) => {
 
