@@ -40,7 +40,7 @@ export class RootQuery {
 
 @Schema( {
     rootQuery: 'RootQuery',
-    components: [ RootQuery ]
+    components: [ RootQuery, User ]
 } )
 export class MySchema extends BaseSchema {
 }
