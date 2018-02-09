@@ -23,7 +23,6 @@ export class Injector {
     private instances: Map<string, any> = new Map<string, any>();
 
     constructor() {
-
     }
 
     /**
@@ -81,7 +80,7 @@ export class Injector {
      * Return a list of token matching each dependencies needed for this constructor
      * @param ctr
      */
-    getDependenciesTokens( ctr: Function ) {
+    private getDependenciesTokens( ctr: Function ) {
         let paramtypes: any[] = Reflect.getMetadata( META_KEY_DESIGN_PARAMSTYPES, ctr );
         if ( !paramtypes ) {
             paramtypes = [];

@@ -1,6 +1,6 @@
 
 import { getMetaObject } from '../shared';
-import { TestTools } from '../test';
+import { executeMiddlewares, createInjectable } from '../test';
 import { createMiddlewareSequence, MiddlewareDescriptor, Middleware, MiddlewareInterface, } from './middleware';
 
 describe( 'createMiddlewareSequence function', () => {
@@ -12,12 +12,12 @@ describe( 'createMiddlewareSequence function', () => {
     it( 'should throw if middleware does not have an execute function', () => {
         class MA { }
         let descs: MiddlewareDescriptor[] = [ { provider: MA } ];
-        expect( () => TestTools.executeMiddlewares( descs ) ).toThrowError();
+        expect( () => executeMiddlewares( descs ) ).toThrowError();
     } );
 
     it( 'should work with an empty middleware list', () => {
         let descs: MiddlewareDescriptor[] = [];
-        expect( TestTools.executeMiddlewares( descs ) ).resolves.toEqual( [] );
+        expect( executeMiddlewares( descs ) ).resolves.toEqual( [] );
     } );
 
     it( 'should work with one middleware', async () => {
@@ -29,7 +29,7 @@ describe( 'createMiddlewareSequence function', () => {
         }
         let descs: MiddlewareDescriptor[] = [ { provider: MA, options: 'Options' } ];
 
-        let p = TestTools.executeMiddlewares( descs ).then( ( r ) => {
+        let p = executeMiddlewares( descs ).then( ( r ) => {
             expect( r ).toEqual( [ "A" ] );
             expect( spy ).toHaveBeenCalledTimes( 1 );
             expect( spy ).toHaveBeenCalledWith( 'Options' );
@@ -49,7 +49,7 @@ describe( 'createMiddlewareSequence function', () => {
             { provider: MA,  resultName: 'A' }
         ];
         let context: any = {};
-        let p = TestTools.executeMiddlewares( descs, { context } ).then( ( result ) => {
+        let p = executeMiddlewares( descs, { context } ).then( ( result ) => {
             expect( context ).toEqual( { A: 'A' } );
             return result;
         } );
@@ -74,7 +74,7 @@ describe( 'createMiddlewareSequence function', () => {
             { provider: MC, options: 'OptionsC', resultName: 'A' }
         ];
         let context: any = {};
-        let p = TestTools.executeMiddlewares( descs, { context } ).then( ( result ) => {
+        let p = executeMiddlewares( descs, { context } ).then( ( result ) => {
             expect( context ).toEqual( { A: [ 'A', 'B', 'C' ] } );
             return result;
         } );
@@ -95,7 +95,7 @@ describe( 'createMiddlewareSequence function', () => {
             { provider: MB, options: 'OptionsB', resultName: 'B' }
         ];
         let context: any = {};
-        let p = TestTools.executeMiddlewares( descs, { context } ).then( ( result ) => {
+        let p = executeMiddlewares( descs, { context } ).then( ( result ) => {
             expect( context ).toEqual( { A: 'A', B: 'B' } );
             return result;
         } );
@@ -128,7 +128,7 @@ describe( 'createMiddlewareSequence function', () => {
             { provider: MC, options: 'OptionsC', resultName: 'C' }
         ];
 
-        let p = TestTools.executeMiddlewares( descs, { context: {} } ).then( ( result ) => {
+        let p = executeMiddlewares( descs, { context: {} } ).then( ( result ) => {
             expect( spyA ).toHaveBeenCalledTimes( 1 );
             expect( spyA ).toHaveBeenCalledWith( [ {}, 'OptionsA' ] );
             expect( spyB ).toHaveBeenCalledTimes( 1 );
@@ -154,7 +154,7 @@ describe( 'createMiddlewareSequence function', () => {
             { provider: MA, options: 'OptionsA', resultName: 'A' }
         ];
 
-        let p = TestTools.executeMiddlewares( descs, { context: {} } ).then( () => {
+        let p = executeMiddlewares( descs, { context: {} } ).then( () => {
             expect( spyA ).toHaveBeenCalledTimes( 1 );
             expect( spyA ).toHaveBeenCalledWith( [ {}, 'OptionsA' ] );
         } );
@@ -176,7 +176,7 @@ describe( 'createMiddlewareSequence function', () => {
             { provider: MA, options: 'OptionsA', resultName: 'A' }
         ];
 
-        let p = TestTools.executeMiddlewares( descs, { context: {} } ).then( () => {
+        let p = executeMiddlewares( descs, { context: {} } ).then( () => {
             expect( spyA ).toHaveBeenCalledTimes( 1 );
             expect( spyA ).toHaveBeenCalledWith( [ {}, 'OptionsA' ] );
         } );
@@ -197,7 +197,7 @@ describe( 'createMiddlewareSequence function', () => {
             { provider: MA, options: 'OptionsA', resultName: 'A' }
         ];
 
-        let p = TestTools.executeMiddlewares( descs, { context: {} } ).then( () => {
+        let p = executeMiddlewares( descs, { context: {} } ).then( () => {
             expect( spyA ).toHaveBeenCalledTimes( 1 );
             expect( spyA ).toHaveBeenCalledWith( [ {}, 'OptionsA' ] );
         } );
