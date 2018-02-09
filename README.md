@@ -61,7 +61,7 @@ this.app.listen( config.get( 'server.port' ), () => {
 
 # Documentation
 
-See the [AeroGraphQL documentation](https://aerographql.github.io/documentation/)
+Checkout the **[AeroGraphQL documentation](https://aerographql.github.io/documentation/)** and explore **[basic examples](https://github.com/aerographql/examples)**.
 
 # License
 AeroGraphQL is freely distributable under the terms of the MIT license.
