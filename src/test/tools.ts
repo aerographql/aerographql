@@ -4,7 +4,7 @@ import { executeAsyncFunctionSequentialy } from '../shared';
 
 export namespace TestTools {
 
-    interface MwArgs {
+    export interface MwArgs {
         source?: any;
         args?: any;
         context?: any
