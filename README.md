@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/aerographql/packages.svg?branch=master)](https://travis-ci.org/aerographql/packages)
+[![Build Status](https://travis-ci.org/aerographql/aerographql.svg?branch=master)](https://travis-ci.org/aerographql/aerographql)
 [![Coverage Status](https://coveralls.io/repos/github/aerographql/packages/badge.svg?branch=master)](https://coveralls.io/github/aerographql/packages?branch=master)
 
 aerographql-core [![npm version](https://badge.fury.io/js/aerographql-core.svg)](https://badge.fury.io/js/aerographql-core)
