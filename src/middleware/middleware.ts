@@ -18,7 +18,7 @@ export function Middleware() {
 /**
  * Interface that need to be implemented be every Middleware
  */
-export interface BaseMiddleware<T=any> {
+export interface MiddlewareInterface<T=any> {
     execute( src: any, args: any, context: any, options: any ): T | Promise<T>;
 }
 
@@ -70,7 +70,7 @@ export let createMiddlewareSequence = ( middlewares: MiddlewareDescriptor[], inj
 
     middlewares.forEach( mwDesc => {
 
-        let mwInstance: BaseMiddleware = injector.get( mwDesc.provider, null );
+        let mwInstance: MiddlewareInterface = injector.get( mwDesc.provider, null );
         if ( !mwInstance ) {
             throw new Error( `Unable to find instance at token "${mwDesc.provider}" for middleware` );
         }

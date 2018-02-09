@@ -1,7 +1,7 @@
 
 import { getMetaObject } from '../shared';
 import { TestTools } from '../test';
-import { createMiddlewareSequence, MiddlewareDescriptor, Middleware, BaseMiddleware, } from './middleware';
+import { createMiddlewareSequence, MiddlewareDescriptor, Middleware, MiddlewareInterface, } from './middleware';
 
 describe( 'createMiddlewareSequence function', () => {
 
@@ -24,7 +24,7 @@ describe( 'createMiddlewareSequence function', () => {
 
         let spy = jest.fn();
         @Middleware()
-        class MA implements BaseMiddleware<string> {
+        class MA implements MiddlewareInterface<string> {
             execute( src: any, args: any, context: any, options: any ) { spy( options ); return 'A'; }
         }
         let descs: MiddlewareDescriptor[] = [ { provider: MA, options: 'Options' } ];
@@ -41,7 +41,7 @@ describe( 'createMiddlewareSequence function', () => {
 
     it( 'should store middlewares results when returing a promise', () => {
         @Middleware()
-        class MA implements BaseMiddleware<string> {
+        class MA implements MiddlewareInterface<string> {
             execute( src: any, args: any, context: any, options: any ) { return Promise.resolve( 'A' ); }
         }
 
@@ -57,15 +57,15 @@ describe( 'createMiddlewareSequence function', () => {
     } );
     it( 'should store middlewares results with the same name in an array ', () => {
         @Middleware()
-        class MA implements BaseMiddleware<string> {
+        class MA implements MiddlewareInterface<string> {
             execute( src: any, args: any, context: any, options: any ) { return 'A'; }
         }
         @Middleware()
-        class MB implements BaseMiddleware<string> {
+        class MB implements MiddlewareInterface<string> {
             execute( src: any, args: any, context: any, options: any ) { return 'B'; }
         }
         @Middleware()
-        class MC implements BaseMiddleware<string> {
+        class MC implements MiddlewareInterface<string> {
             execute( src: any, args: any, context: any, options: any ) { return 'C'; }
         }
         let descs: MiddlewareDescriptor[] = [
@@ -83,11 +83,11 @@ describe( 'createMiddlewareSequence function', () => {
 
     it( 'should store middlewares results with the different name directly in the context ', () => {
         @Middleware()
-        class MA implements BaseMiddleware<string> {
+        class MA implements MiddlewareInterface<string> {
             execute( src: any, args: any, context: any, options: any ) { return 'A'; }
         }
         @Middleware()
-        class MB implements BaseMiddleware<string> {
+        class MB implements MiddlewareInterface<string> {
             execute( src: any, args: any, context: any, options: any ) { return 'B'; }
         }
         let descs: MiddlewareDescriptor[] = [
@@ -108,17 +108,17 @@ describe( 'createMiddlewareSequence function', () => {
         let spyB = jest.fn();
         let spyC = jest.fn();
         @Middleware()
-        class MA implements BaseMiddleware<string> {
+        class MA implements MiddlewareInterface<string> {
             execute( src: any, args: any, context: any, options: any ) { spyA( [ cloneObject( context ), cloneObject( options ) ] ); return 'A'; }
         }
 
         @Middleware()
-        class MB implements BaseMiddleware<string> {
+        class MB implements MiddlewareInterface<string> {
             execute( src: any, args: any, context: any, options: any ) { spyB( [ cloneObject( context ), cloneObject( options ) ] ); return 'B'; }
         }
 
         @Middleware()
-        class MC implements BaseMiddleware<string> {
+        class MC implements MiddlewareInterface<string> {
             execute( src: any, args: any, context: any, options: any ) { spyC( [ cloneObject( context ), cloneObject( options ) ] ); return 'C'; }
         }
 
@@ -146,7 +146,7 @@ describe( 'createMiddlewareSequence function', () => {
         let spyA = jest.fn();
 
         @Middleware()
-        class MA implements BaseMiddleware<boolean> {
+        class MA implements MiddlewareInterface<boolean> {
             execute( src: any, args: any, context: any, options: any ) { spyA( [ cloneObject( context ), cloneObject( options ) ] ); return false; }
         }
 
@@ -168,7 +168,7 @@ describe( 'createMiddlewareSequence function', () => {
         let spyA = jest.fn();
 
         @Middleware()
-        class MA implements BaseMiddleware<boolean> {
+        class MA implements MiddlewareInterface<boolean> {
             execute( src: any, args: any, context: any, options: any ) { spyA( [ cloneObject( context ), cloneObject( options ) ] ); return Promise.reject( 'rejectValue' ); }
         }
 
@@ -189,7 +189,7 @@ describe( 'createMiddlewareSequence function', () => {
         let spyA = jest.fn();
 
         @Middleware()
-        class MA implements BaseMiddleware<any> {
+        class MA implements MiddlewareInterface<any> {
             execute( src: any, args: any, context: any, options: any ) { spyA( [ cloneObject( context ), cloneObject( options ) ] ); throw new Error( 'errorValue' ); }
         }
 

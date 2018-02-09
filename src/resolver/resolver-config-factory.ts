@@ -1,6 +1,6 @@
 import { GraphQLFieldConfig, GraphQLNonNull, GraphQLList } from 'graphql';
 
-import { BaseMiddleware, createMiddlewareSequence } from '../middleware';
+import { MiddlewareInterface, createMiddlewareSequence } from '../middleware';
 import { ObjectDefinitionMetaObject } from '../object';
 import { ResolverMetaObject } from './resolver';
 import { isPromise, executeAsyncFunctionSequentialy, FactoryContext } from '../shared';
