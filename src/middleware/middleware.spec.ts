@@ -8,10 +8,27 @@ describe( 'createMiddlewareSequence function', () => {
     let cloneObject = ( obj: any ) => {
         return JSON.parse( JSON.stringify( obj ) );
     };
+    it( 'should work with one middleware', async () => {
+
+        @Middleware()
+        class MA implements MiddlewareInterface<string> {
+            execute( src: any, args: any, context: any, options: any ) { return 'A'; }
+        }
+        let descs: MiddlewareDescriptor[] = [ { middleware: MA, options: 'Options', resultName: 'result' } ];
+    
+        let context:any = {};
+        let p = executeMiddlewares( descs, { context } ).then( ( r ) => {
+            expect( context ).toHaveProperty( 'result');
+            expect( context.result ).toEqual( 'A' )
+            return r;
+        } );
+        expect( p ).resolves.toBeTruthy();
+    
+    } );
 
     it( 'should throw if middleware does not have an execute function', () => {
         class MA { }
-        let descs: MiddlewareDescriptor[] = [ { provider: MA } ];
+        let descs: MiddlewareDescriptor[] = [ { middleware: MA } ];
         expect( () => executeMiddlewares( descs ) ).toThrowError();
     } );
 
@@ -27,7 +44,7 @@ describe( 'createMiddlewareSequence function', () => {
         class MA implements MiddlewareInterface<string> {
             execute( src: any, args: any, context: any, options: any ) { spy( options ); return 'A'; }
         }
-        let descs: MiddlewareDescriptor[] = [ { provider: MA, options: 'Options' } ];
+        let descs: MiddlewareDescriptor[] = [ { middleware: MA, options: 'Options' } ];
 
         let p = executeMiddlewares( descs ).then( ( r ) => {
             expect( r ).toEqual( [ "A" ] );
@@ -46,7 +63,7 @@ describe( 'createMiddlewareSequence function', () => {
         }
 
         let descs: MiddlewareDescriptor[] = [
-            { provider: MA,  resultName: 'A' }
+            { middleware: MA,  resultName: 'A' }
         ];
         let context: any = {};
         let p = executeMiddlewares( descs, { context } ).then( ( result ) => {
@@ -69,9 +86,9 @@ describe( 'createMiddlewareSequence function', () => {
             execute( src: any, args: any, context: any, options: any ) { return 'C'; }
         }
         let descs: MiddlewareDescriptor[] = [
-            { provider: MA, options: 'OptionsA', resultName: 'A' },
-            { provider: MB, options: 'OptionsB', resultName: 'A' },
-            { provider: MC, options: 'OptionsC', resultName: 'A' }
+            { middleware: MA, options: 'OptionsA', resultName: 'A' },
+            { middleware: MB, options: 'OptionsB', resultName: 'A' },
+            { middleware: MC, options: 'OptionsC', resultName: 'A' }
         ];
         let context: any = {};
         let p = executeMiddlewares( descs, { context } ).then( ( result ) => {
@@ -91,8 +108,8 @@ describe( 'createMiddlewareSequence function', () => {
             execute( src: any, args: any, context: any, options: any ) { return 'B'; }
         }
         let descs: MiddlewareDescriptor[] = [
-            { provider: MA, options: 'OptionsA', resultName: 'A' },
-            { provider: MB, options: 'OptionsB', resultName: 'B' }
+            { middleware: MA, options: 'OptionsA', resultName: 'A' },
+            { middleware: MB, options: 'OptionsB', resultName: 'B' }
         ];
         let context: any = {};
         let p = executeMiddlewares( descs, { context } ).then( ( result ) => {
@@ -123,9 +140,9 @@ describe( 'createMiddlewareSequence function', () => {
         }
 
         let descs: MiddlewareDescriptor[] = [
-            { provider: MA, options: 'OptionsA', resultName: 'A' },
-            { provider: MB, options: 'OptionsB', resultName: 'B' },
-            { provider: MC, options: 'OptionsC', resultName: 'C' }
+            { middleware: MA, options: 'OptionsA', resultName: 'A' },
+            { middleware: MB, options: 'OptionsB', resultName: 'B' },
+            { middleware: MC, options: 'OptionsC', resultName: 'C' }
         ];
 
         let p = executeMiddlewares( descs, { context: {} } ).then( ( result ) => {
@@ -151,7 +168,7 @@ describe( 'createMiddlewareSequence function', () => {
         }
 
         let descs: MiddlewareDescriptor[] = [
-            { provider: MA, options: 'OptionsA', resultName: 'A' }
+            { middleware: MA, options: 'OptionsA', resultName: 'A' }
         ];
 
         let p = executeMiddlewares( descs, { context: {} } ).then( () => {
@@ -173,7 +190,7 @@ describe( 'createMiddlewareSequence function', () => {
         }
 
         let descs: MiddlewareDescriptor[] = [
-            { provider: MA, options: 'OptionsA', resultName: 'A' }
+            { middleware: MA, options: 'OptionsA', resultName: 'A' }
         ];
 
         let p = executeMiddlewares( descs, { context: {} } ).then( () => {
@@ -194,7 +211,7 @@ describe( 'createMiddlewareSequence function', () => {
         }
 
         let descs: MiddlewareDescriptor[] = [
-            { provider: MA, options: 'OptionsA', resultName: 'A' }
+            { middleware: MA, options: 'OptionsA', resultName: 'A' }
         ];
 
         let p = executeMiddlewares( descs, { context: {} } ).then( () => {

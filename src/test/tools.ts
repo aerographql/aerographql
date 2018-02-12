@@ -14,7 +14,7 @@ export function executeMiddlewares( descs: MiddlewareDescriptor[], args: Execute
     // Build a list of providers needed to run this mw.
     // This include the mw themself plus any additional providers
     let providers = additionalProviders.slice();
-    descs.forEach( d => providers.push( d.provider ) );
+    descs.forEach( d => providers.push( d.middleware ) );
 
     let s = createMiddlewareSequence( descs, Injector.resolveAndCreate( providers ) );
     return executeAsyncFunctionSequentialy( s, [ realArgs.source, realArgs.args, realArgs.context ] );

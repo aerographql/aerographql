@@ -77,7 +77,7 @@ describe( 'getSchemaResolvers function', () => {
     @ObjectDefinition( { name: 'RootQuery' } )
     class RootQueryDefA { }
 
-    @ObjectImplementation( { name: 'RootQuery', middlewares: [ { provider: MiddlewareA } ] } )
+    @ObjectImplementation( { name: 'RootQuery', middlewares: [ { middleware: MiddlewareA } ] } )
     class RootQueryImplA {
         @Resolver( { type: 'Float' } )
         resolverA() { }

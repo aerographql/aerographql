@@ -22,7 +22,7 @@ export type ResolveTypeFunction = ( value: any, context: any, info: any ) => str
  * @param customResolveType 
  * @param potentialTypes 
  */
-export let createdResolveType = ( name: string, customResolveType: ResolveTypeFunction, potentialTypes: Function[] ) => {
+export let createdResolveType = ( name: string, customResolveType: ResolveTypeFunction, potentialTypes: Function[] ) : ResolveTypeFunction => {
 
     let types: { [ key: string ]: { [ key: string ]: FieldMetaObject } } = {};
 

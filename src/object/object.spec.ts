@@ -137,14 +137,14 @@ describe( 'objectTypeFactory function', () => {
 
     @ObjectImplementation( {
         name: 'TypeA',
-        middlewares: [ { provider: MA, resultName: 'A' }, { provider: MB, resultName: 'B' } ],
+        middlewares: [ { middleware: MA, resultName: 'A' }, { middleware: MB, resultName: 'B' } ],
         implements: [ IB ]
     } )
     class TypeImplA {
 
         @Resolver( {
             type: 'Int',
-            middlewares: [ { provider: MC, resultName: 'C' }, { provider: MB, options: 'MwOptions', resultName: 'B' } ]
+            middlewares: [ { middleware: MC, resultName: 'C' }, { middleware: MB, options: 'MwOptions', resultName: 'B' } ]
         } )
         resolverA( @Arg() input: InputA ) { return 'ResolverAReturn'; }
 

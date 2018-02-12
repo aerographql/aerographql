@@ -34,7 +34,7 @@ class MiddlewareError {
  * Structure describing how a mw should be called and how to store it's results.
 */
 export interface MiddlewareDescriptor {
-    provider: Function;
+    middleware: Function;
     options?: any;
     resultName?: string;
 }
@@ -70,19 +70,19 @@ export let createMiddlewareSequence = ( middlewares: MiddlewareDescriptor[], inj
 
     middlewares.forEach( mwDesc => {
 
-        let mwInstance: MiddlewareInterface = injector.get( mwDesc.provider, null );
+        let mwInstance: MiddlewareInterface = injector.get( mwDesc.middleware, null );
         if ( !mwInstance ) {
-            throw new Error( `Unable to find instance at token "${mwDesc.provider}" for middleware` );
+            throw new Error( `Unable to find instance at token "${mwDesc.middleware}" for middleware` );
         }
 
         let executeFunction = mwInstance.execute;
         if ( !executeFunction ) {
-            throw new Error( `No execute function found in middleware  "${mwDesc.provider}"` );
+            throw new Error( `No execute function found in middleware  "${mwDesc.middleware}"` );
         }
 
         let closure = ( source: any, args: any, context: any ) => {
 
-            let providerName = mwDesc.provider.name;
+            let providerName = mwDesc.middleware.name;
 
             // Normalize context
             if ( !context ) context = {};

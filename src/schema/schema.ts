@@ -97,7 +97,7 @@ export function getSchemaProviders( schema: Function ) {
         if ( isOfMetaObjectType( provider, METAOBJECT_TYPES.objectImplementation ) ) {
             let m = getMetaObject<ObjectImplementationMetaObject>( provider, METAOBJECT_TYPES.objectImplementation );
             for ( let k in m.resolvers ) {
-                m.resolvers[ k ].middlewares.forEach( middleware => providers.add( middleware.provider ) );
+                m.resolvers[ k ].middlewares.forEach( middleware => providers.add( middleware.middleware ) );
             }
         }
     } );
