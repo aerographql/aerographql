@@ -365,15 +365,13 @@ describe( 'objectTypeFactory function', () => {
 
 describe( 'When used from an express middleware, Object', () => {
 
-    @ObjectDefinition( {
-        name: 'TestType1'
-    } )
+    @ObjectDefinition( )
     class TestType1 {
         @Field( { type: 'Int' } ) fieldA: number = 0;
         @Field() fieldB: string = "String";
     }
 
-    @ObjectImplementation( { name: 'TestRootQuery' } )
+    @ObjectImplementation()
     class TestRootQuery {
         static spy: jest.Mock;
         @Resolver( { type: TestType1 } )
