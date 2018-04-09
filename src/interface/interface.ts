@@ -3,9 +3,10 @@ import 'reflect-metadata';
 import { FieldMetaObjectMap } from '../field';
 import {
     META_KEY_METAOBJECT, META_KEY_FIELDS_MAP, META_KEY_METAOBJECT_TYPE,
-    METAOBJECT_TYPES, ensureMetadata, ResolveTypeFunction
+    METAOBJECT_TYPES, ensureMetadata, ResolveTypeFunction, META_KEY_RESOLVERS_MAP
 } from '../shared';
 
+import { ResolverMetaObjectMap } from '../resolver';
 /**
  * Interface definition decorator
  */
@@ -19,10 +20,13 @@ export function Interface( config: InterfaceConfig = {} ) {
         let desc = null;
         if ( config.description ) desc = config.description;
 
+        let fieldsImpl = ensureMetadata<ResolverMetaObjectMap>( META_KEY_RESOLVERS_MAP, ctr, {} );
+
         let md: InterfaceMetaObject = {
             name: name,
             description: desc,
             fields: fields,
+            resolvers: fieldsImpl,
             resolveType: config.resolveType,
             implementers: []
         };
@@ -42,4 +46,5 @@ export interface InterfaceMetaObject {
     fields: FieldMetaObjectMap;
     resolveType: ResolveTypeFunction;
     implementers: Function[];
+    resolvers: ResolverMetaObjectMap;
 }

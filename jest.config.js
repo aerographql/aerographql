@@ -6,6 +6,5 @@ module.exports = {
     "moduleFileExtensions": [
         "ts",
         "js"
-    ],
-    "mapCoverage": true
+    ]
 }

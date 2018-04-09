@@ -6,6 +6,7 @@ import { Schema, BaseSchema } from '../schema';
 import { getMetaObject, getMetaObjectType, METAOBJECT_TYPES, FactoryContext } from '../shared';
 import { TestServer } from '../test';
 import { Field } from '../field';
+import { Arg } from '../arg';
 
 
 describe( '@InterfaceDefinition decorator', () => {
@@ -35,6 +36,46 @@ describe( '@InterfaceDefinition decorator', () => {
     it( 'should set the correct fields', () => {
         expect( mo.fields ).toHaveProperty( 'fieldA' );
         expect( mo.fields ).toHaveProperty( 'fieldB' );
+    } );
+
+} );
+
+describe( '@InterfaceDefinition decorator with resolver', () => {
+
+    @Interface( {
+        name: 'InterfaceA',
+        description: 'Desc',
+    } )
+    class InterfaceA {
+        @Resolver( { type: 'Int' } ) fieldA( @Arg() a: string ): number {
+            return 28;
+        }
+    }
+
+    let mo: InterfaceMetaObject;
+    beforeEach( () => {
+        mo = getMetaObject<InterfaceMetaObject>( InterfaceA );
+    } );
+
+    it( 'should set the correct metadata', () => {
+        expect( mo ).not.toBeNull();
+        expect( mo.name ).toBe( 'InterfaceA' );
+        expect( mo.description ).toBe( 'Desc' );
+    } );
+    it( 'should set the correct type', () => {
+        expect( getMetaObjectType( InterfaceA ) ).toBe( METAOBJECT_TYPES.interface );
+    } );
+    it( 'should set the correct fields', () => {
+        expect( mo.resolvers ).toHaveProperty( 'fieldA' );
+        let res = mo.resolvers.fieldA;
+        expect( res.instanceToken ).toBe( "InterfaceA" );
+        expect( res.type ).toBe( 'Int' );
+    } );
+    it( 'should set the correct args for resolver', () => {
+        expect( mo.resolvers ).toHaveProperty( 'fieldA' );
+        let res = mo.resolvers.fieldA;
+        expect( res.args ).toHaveProperty( 'a' );
+        expect( res.args.a.type ).toBe( 'String' );
     } );
 
 } );

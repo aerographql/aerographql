@@ -3,6 +3,7 @@ import { GraphQLInterfaceType, GraphQLInterfaceTypeConfig, GraphQLResolveInfo } 
 import { InterfaceMetaObject } from './interface';
 import { METAOBJECT_TYPES, getMetaObject, createdResolveType, FactoryContext } from '../shared';
 import { fieldConfigFactory } from '../field';
+import { resolverConfigFactory } from '../resolver';
 
 export let interfaceFactory = function ( ctr: Function, context: FactoryContext ) {
 
@@ -22,6 +23,10 @@ export let interfaceFactory = function ( ctr: Function, context: FactoryContext 
         let fields: any = {};
         for ( let key in metaObject.fields )
             fields[ key ] = fieldConfigFactory( metaObject.fields[ key ], context );
+
+        for ( let key in metaObject.resolvers )
+            fields[ key ] = resolverConfigFactory( metaObject.resolvers[ key ], key, context, false );
+
         return fields;
     };
 

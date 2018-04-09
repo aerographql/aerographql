@@ -17,9 +17,8 @@ export let fieldConfigFactory = function ( metaObject: FieldMetaObject, context:
     }
 
     let type = context.lookupType( metaObject.type );
-    if ( ( type instanceof GraphQLInputObjectType ) || ( type instanceof GraphQLInterfaceType ) )
+    if ( ( type instanceof GraphQLInputObjectType ) )
         throw new Error( `Type "${metaObject.type}" is not a valid type` )
-
 
     if ( metaObject.list )
         type = new GraphQLList<any>( type );

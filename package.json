@@ -14,7 +14,7 @@
     },
     "scripts": {
         "prepublishOnly": "rm -rf ./dist && tsc -D && jest",
-        "build": "tsc",
+        "build": "tsc -D",
         "test": "jest"
     },
     "repository": {
