@@ -1,4 +1,3 @@
-import 'reflect-metadata';
 import { getFunctionParametersName } from './utilities';
 import { getMetaObject, METAOBJECT_TYPES, getMetaObjectType } from './metaobject';
 

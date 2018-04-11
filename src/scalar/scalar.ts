@@ -1,7 +1,6 @@
 
-import 'reflect-metadata';
 import { ASTNode } from 'graphql';
-import { META_KEY_METAOBJECT, META_KEY_METAOBJECT_TYPE, METAOBJECT_TYPES } from '../shared';
+import { META_KEY_METAOBJECT, META_KEY_METAOBJECT_TYPE, METAOBJECT_TYPES, setMetadata } from '../shared';
 
 /**
  * Scalar implementation definition
@@ -21,8 +20,8 @@ export function Scalar( config: ScalarConfig ) {
             description: desc
         };
 
-        Reflect.defineMetadata( META_KEY_METAOBJECT, md, ctr );
-        Reflect.defineMetadata( META_KEY_METAOBJECT_TYPE, METAOBJECT_TYPES.scalar, ctr );
+        setMetadata( META_KEY_METAOBJECT, md, ctr );
+        setMetadata( META_KEY_METAOBJECT_TYPE, METAOBJECT_TYPES.scalar, ctr );
     }
 }
 

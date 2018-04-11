@@ -1,9 +1,8 @@
 
-import 'reflect-metadata';
 import {
     META_KEY_ARGS_MAP,
     META_KEY_METAOBJECT_TYPE, getFunctionParametersName, META_KEY_DESIGN_PARAMSTYPES,
-    isOfMetaObjectType, getMetaObject, convertTypeFromTsToGraphQL, ensureMetadata
+    isOfMetaObjectType, getMetaObject, convertTypeFromTsToGraphQL, safeGetMetadata, getMetadata
 } from '../shared';
 
 import { ObjectDefinitionMetaObject } from '../object';
@@ -14,7 +13,7 @@ import { ObjectDefinitionMetaObject } from '../object';
 export function Arg( config: ArgConfig = { nullable: false, list: false } ) {
 
     return function ( target: any, fieldName: string, index: number ): void {
-        let classArgMap = ensureMetadata<ArgsMetaObjectMap>( META_KEY_ARGS_MAP, target.constructor, {} );
+        let classArgMap = safeGetMetadata<ArgsMetaObjectMap>( META_KEY_ARGS_MAP, target.constructor, {} );
 
         let paramNames = getFunctionParametersName( target[ fieldName ] );
         let argName = paramNames[ index ];
@@ -27,7 +26,7 @@ export function Arg( config: ArgConfig = { nullable: false, list: false } ) {
         let nullable = !!config.nullable;
         if ( config.nullable === undefined ) nullable = false;
 
-        let paramTypes: any[] = Reflect.getMetadata( META_KEY_DESIGN_PARAMSTYPES, target, fieldName );
+        let paramTypes: any[] = getMetadata( META_KEY_DESIGN_PARAMSTYPES, target, fieldName );
 
         let list = !!config.list;
         let inferedType = paramTypes[ index ];
@@ -99,6 +98,6 @@ export function getArgsMetaObject( target: any, fieldName: string ) {
  * @param target 
  */
 export function getArgsMetaObjectMap( target: Function ) {
-    let classArgMap: ArgsMetaObjectMap = Reflect.getMetadata( META_KEY_ARGS_MAP, target );
+    let classArgMap: ArgsMetaObjectMap = getMetadata( META_KEY_ARGS_MAP, target );
     return classArgMap;
 }

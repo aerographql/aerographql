@@ -1,3 +1,5 @@
+import 'reflect-metadata';
+
 /**
  * Check whether an input object is a Promise or not
  * @param obj 
@@ -47,11 +49,27 @@ export let deduplicateArray = function ( arr: any[] ) {
     return Array.from( it );
 }
 
-export function ensureMetadata<T>( key: string, target: any, defaultValue: any ) {
-    if ( !Reflect.hasMetadata( key, target ) ) {
-        Reflect.defineMetadata( key, defaultValue, target );
+export function safeGetMetadata<T>( key: string, target: any, defaultValue: any ) {
+    if ( !hasMetadata( key, target ) ) {
+        setMetadata( key, defaultValue, target );
     }
     return Reflect.getMetadata( key, target ) as T;
+}
+
+export function getMetadata<T=any>( key: string, target: any, field: any = undefined ) {
+    return Reflect.getMetadata( key, target, field ) as T;
+}
+
+export function hasMetadata( key: string, target: any, field: any = undefined ) {
+    return Reflect.hasMetadata( key, target, field );
+}
+
+export function setMetadata( key: string, value: any, target: any  ) {
+    return Reflect.defineMetadata( key, value, target );
+}
+
+export function callFunction( func: any, inst: any, args: any ) {
+    return Reflect.apply( func, inst, args );
 }
 
 

@@ -1,7 +1,7 @@
 import { GraphQLScalarTypeConfig, GraphQLScalarType } from 'graphql';
 
 import { ScalarMetaObject } from './scalar';
-import { getMetaObject, METAOBJECT_TYPES, FactoryContext } from '../shared';
+import { getMetaObject, METAOBJECT_TYPES, FactoryContext, callFunction } from '../shared';
 
 export let scalarFactory = function ( ctr: Function, context: FactoryContext ) {
 
@@ -24,19 +24,19 @@ export let scalarFactory = function ( ctr: Function, context: FactoryContext ) {
         throw new Error( `Unable to find "serialize" function in instance at token "${def.instanceToken}" for scalar implementation of "${def.name}" ` );
     }
     conf.serialize = ( value: any ) => {
-        return Reflect.apply( serializeFunction, instance, [ value ] );
+        return callFunction( serializeFunction, instance, [ value ] );
     };
 
     let parseValueFunction = instance[ 'parseValue' ];
     if ( parseValueFunction )
         conf.parseValue = function ( value: any ) {
-            return Reflect.apply( parseValueFunction, instance, [ value ] );
+            return callFunction( parseValueFunction, instance, [ value ] );
         };
 
     let parseLiteralFunction = instance[ 'parseLiteral' ];
     if ( parseLiteralFunction )
         conf.parseLiteral = function ( value: any ) {
-            return Reflect.apply( parseLiteralFunction, instance, [ value ] );
+            return callFunction( parseLiteralFunction, instance, [ value ] );
         };
 
     if ( def.description )

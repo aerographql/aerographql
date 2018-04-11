@@ -1,9 +1,9 @@
-import 'reflect-metadata';
 import { Injector } from '../di';
+import { setMetadata } from '../shared';
 
 import {
     META_KEY_METAOBJECT_TYPE, METAOBJECT_TYPES,
-    deduplicateArray, getMetaObjectType, isPromise
+    deduplicateArray, getMetaObjectType, isPromise, callFunction
 } from '../shared';
 
 /**
@@ -11,7 +11,7 @@ import {
  */
 export function Middleware() {
     return function ( ctr: Function ) {
-        Reflect.defineMetadata( META_KEY_METAOBJECT_TYPE, METAOBJECT_TYPES.middleware, ctr );
+        setMetadata( META_KEY_METAOBJECT_TYPE, METAOBJECT_TYPES.middleware, ctr );
     }
 }
 
@@ -90,7 +90,7 @@ export let createMiddlewareSequence = ( middlewares: MiddlewareDescriptor[], inj
             // Call the middleware
             let rv: any;
             try {
-                rv = Reflect.apply( executeFunction, mwInstance, [ source, args, context, mwDesc.options ] );
+                rv = callFunction( executeFunction, mwInstance, [ source, args, context, mwDesc.options ] );
             } catch ( reason ) {
                 let o = reason;
                 if ( reason.message ) o = reason.message;

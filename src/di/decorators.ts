@@ -1,6 +1,5 @@
-import 'reflect-metadata';
 import { META_KEY_TOKEN } from '../shared/metaobject';
-
+import { setMetadata } from '../shared/utilities'
 /**
  * Injectable decorator
  *
@@ -25,6 +24,6 @@ export function Inject( token: string ) {
     return function ( target: Object, key: string, index: number ) {
 
         // Add a special metadata to override token name if necessary
-        Reflect.defineMetadata( META_KEY_TOKEN + index, token, target );
+        setMetadata( META_KEY_TOKEN + index, token, target );
     }
 }

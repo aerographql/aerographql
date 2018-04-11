@@ -1,7 +1,6 @@
-import 'reflect-metadata';
 import {
-    META_KEY_DESIGN_TYPE, META_KEY_FIELDS_MAP, ensureMetadata, getMetaObject,
-    isOfMetaObjectType, METAOBJECT_TYPES, convertTypeFromTsToGraphQL, getMetaObjectType
+    META_KEY_DESIGN_TYPE, META_KEY_FIELDS_MAP, safeGetMetadata, getMetaObject,
+    isOfMetaObjectType, METAOBJECT_TYPES, convertTypeFromTsToGraphQL, getMetaObjectType, getMetadata
 } from '../shared';
 
 /**
@@ -23,7 +22,7 @@ export function Field( config: FieldConfig = {} ) {
         }
 
         let list = false;
-        let inferedType = Reflect.getMetadata( META_KEY_DESIGN_TYPE, target, property );
+        let inferedType = getMetadata( META_KEY_DESIGN_TYPE, target, property );
         if ( inferedType && inferedType.name === 'Array' ) {
             list = true;
         }
@@ -51,7 +50,7 @@ export function Field( config: FieldConfig = {} ) {
             type = config.type;
         }
 
-        let fields = ensureMetadata<FieldMetaObjectMap>( META_KEY_FIELDS_MAP, target.constructor, {} );
+        let fields = safeGetMetadata<FieldMetaObjectMap>( META_KEY_FIELDS_MAP, target.constructor, {} );
         if ( fields[ name ] )
             throw new Error( `Field "${name}" already has a definition` );
 

@@ -1,9 +1,7 @@
-import 'reflect-metadata';
-
 import { FieldMetaObjectMap } from '../field';
 import {
     ResolveTypeFunction, META_KEY_METAOBJECT, META_KEY_FIELDS_MAP, META_KEY_METAOBJECT_TYPE,
-    METAOBJECT_TYPES, ensureMetadata
+    METAOBJECT_TYPES, setMetadata
 } from '../shared';
 
 
@@ -25,8 +23,8 @@ export function Union( config: UnionConfig ) {
             resolveType: config.resolveType
         };
 
-        Reflect.defineMetadata( META_KEY_METAOBJECT, md, ctr );
-        Reflect.defineMetadata( META_KEY_METAOBJECT_TYPE, METAOBJECT_TYPES.union, ctr );
+        setMetadata( META_KEY_METAOBJECT, md, ctr );
+        setMetadata( META_KEY_METAOBJECT_TYPE, METAOBJECT_TYPES.union, ctr );
     }
 }
 export interface UnionConfig {

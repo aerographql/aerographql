@@ -1,10 +1,9 @@
 
-import 'reflect-metadata';
 import { Provider } from '../di';
 import { MiddlewareDescriptor } from '../middleware';
 import {
-    META_KEY_RESOLVERS_MAP, METAOBJECT_TYPES,
-    META_KEY_DESIGN_RETURNTYPE, isOfMetaObjectType, getMetaObject, convertTypeFromTsToGraphQL, ensureMetadata
+    META_KEY_RESOLVERS_MAP, METAOBJECT_TYPES, getMetadata,
+    META_KEY_DESIGN_RETURNTYPE, isOfMetaObjectType, getMetaObject, convertTypeFromTsToGraphQL, safeGetMetadata
 } from '../shared';
 import { ArgsMetaObject, getArgsMetaObject } from '../arg';
 import { ObjectDefinitionMetaObject } from '../object';
@@ -25,7 +24,7 @@ export function Resolver( config: ResolverConfig ): MethodDecorator {
         if ( config.list !== undefined ) {
             list = config.list;
         } else {
-            let t = Reflect.getMetadata( META_KEY_DESIGN_RETURNTYPE, target, resolverName );
+            let t = getMetadata( META_KEY_DESIGN_RETURNTYPE, target, resolverName );
             if ( t && t.name === 'Array' ) list = true;
         }
 
@@ -57,7 +56,7 @@ export function Resolver( config: ResolverConfig ): MethodDecorator {
         // Extract any args metadata for this field
         let args = getArgsMetaObject( target.constructor, resolverName );
 
-        let resolvers = ensureMetadata<ResolverMetaObjectMap>( META_KEY_RESOLVERS_MAP, target.constructor, {} );
+        let resolvers = safeGetMetadata<ResolverMetaObjectMap>( META_KEY_RESOLVERS_MAP, target.constructor, {} );
         if ( resolvers[ resolverName ] )
             throw new Error( `Field "${resolverName}" already has an implementation` );
 

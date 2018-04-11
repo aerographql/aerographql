@@ -1,3 +1,5 @@
+import { getMetadata, hasMetadata } from './utilities';
+
 export const META_KEY_METAOBJECT_TYPE = "dtmb:type";
 export const META_KEY_METAOBJECT = "dtmb:metadata";
 export const META_KEY_ARGS_MAP = "dtmb:argsmap";
@@ -36,15 +38,15 @@ export function getMetaObject<T = MetaObject>( target: any, type: METAOBJECT_TYP
         }
     }
 
-    if ( target && Reflect.hasMetadata( META_KEY_METAOBJECT, target ) )
-        return Reflect.getMetadata( META_KEY_METAOBJECT, target ) as T;
-        
+    if ( target && hasMetadata( META_KEY_METAOBJECT, target ) )
+        return getMetadata( META_KEY_METAOBJECT, target ) as T;
+
     return null;
 }
 
 export function getMetaObjectType( target: any ): METAOBJECT_TYPES {
-    if ( Reflect.hasMetadata( META_KEY_METAOBJECT_TYPE, target ) )
-        return Reflect.getMetadata( META_KEY_METAOBJECT_TYPE, target );
+    if ( hasMetadata( META_KEY_METAOBJECT_TYPE, target ) )
+        return getMetadata( META_KEY_METAOBJECT_TYPE, target );
     return METAOBJECT_TYPES.notAnnotated;
 }
 

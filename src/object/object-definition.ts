@@ -1,7 +1,6 @@
-import 'reflect-metadata';
 import {
     META_KEY_METAOBJECT, META_KEY_FIELDS_MAP, META_KEY_METAOBJECT_TYPE,
-    METAOBJECT_TYPES, ensureMetadata, getMetaObject, getMetaObjectType
+    METAOBJECT_TYPES, safeGetMetadata, getMetaObject, getMetaObjectType, setMetadata
 } from '../shared';
 
 import { InterfaceMetaObject } from '../interface';
@@ -15,7 +14,7 @@ export function ObjectDefinition( config: ObjectDefinitionConfig = {} ) {
 
     return function ( ctr: Function ) {
 
-        let fields = ensureMetadata<FieldMetaObjectMap>( META_KEY_FIELDS_MAP, ctr, {} );
+        let fields = safeGetMetadata<FieldMetaObjectMap>( META_KEY_FIELDS_MAP, ctr, {} );
 
         let desc = null;
         if ( config.description ) desc = config.description;
@@ -43,8 +42,8 @@ export function ObjectDefinition( config: ObjectDefinitionConfig = {} ) {
             fields: fields
         };
 
-        Reflect.defineMetadata( META_KEY_METAOBJECT, md, ctr );
-        Reflect.defineMetadata( META_KEY_METAOBJECT_TYPE, METAOBJECT_TYPES.objectDefinition, ctr );
+        setMetadata( META_KEY_METAOBJECT, md, ctr );
+        setMetadata( META_KEY_METAOBJECT_TYPE, METAOBJECT_TYPES.objectDefinition, ctr );
     }
 }
 

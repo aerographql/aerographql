@@ -1,7 +1,6 @@
-import 'reflect-metadata';
 import {
     META_KEY_FIELDS_MAP, META_KEY_METAOBJECT, META_KEY_METAOBJECT_TYPE,
-    METAOBJECT_TYPES, ensureMetadata
+    METAOBJECT_TYPES, safeGetMetadata, setMetadata
 } from '../shared';
 import { FieldMetaObjectMap } from '../field';
 
@@ -10,7 +9,7 @@ import { FieldMetaObjectMap } from '../field';
  */
 export function InputObject( config: InputObjectConfig = {} ) {
     return function ( ctr: Function ) {
-        let fields = ensureMetadata<FieldMetaObjectMap>( META_KEY_FIELDS_MAP, ctr, {} );
+        let fields = safeGetMetadata<FieldMetaObjectMap>( META_KEY_FIELDS_MAP, ctr, {} );
 
         let name = ctr.name;
         if ( config.name ) name = config.name;
@@ -24,8 +23,8 @@ export function InputObject( config: InputObjectConfig = {} ) {
             fields: fields
         };
 
-        Reflect.defineMetadata( META_KEY_METAOBJECT, md, ctr );
-        Reflect.defineMetadata( META_KEY_METAOBJECT_TYPE, METAOBJECT_TYPES.inputObject, ctr );
+        setMetadata( META_KEY_METAOBJECT, md, ctr );
+        setMetadata( META_KEY_METAOBJECT_TYPE, METAOBJECT_TYPES.inputObject, ctr );
     }
 }
 

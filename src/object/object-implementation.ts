@@ -1,12 +1,10 @@
-
-import 'reflect-metadata';
-
 import { MiddlewareDescriptor } from '../middleware';
 import { Provider } from '../di';
 import {
     META_KEY_METAOBJECT, META_KEY_RESOLVERS_MAP, METAOBJECT_TYPES,
     META_KEY_METAOBJECT_TYPE, getFunctionParametersName, META_KEY_DESIGN_PARAMSTYPES, META_KEY_ARGS_MAP,
-    META_KEY_DESIGN_TYPE, isOfMetaObjectType, getMetaObject, convertTypeFromTsToGraphQL, ensureMetadata, getMetaObjectType
+    META_KEY_DESIGN_TYPE, isOfMetaObjectType, getMetaObject, 
+    convertTypeFromTsToGraphQL, safeGetMetadata, getMetaObjectType, setMetadata
 } from '../shared';
 import { ResolverMetaObjectMap } from '../resolver';
 import { ArgsMetaObject, getArgsMetaObject } from '../arg';
@@ -45,7 +43,7 @@ export function ObjectImplementation( config: ObjectImplementationConfig = {} ) 
             typeMiddlewares = config.middlewares;
         }
 
-        let fieldsImpl = ensureMetadata<ResolverMetaObjectMap>( META_KEY_RESOLVERS_MAP, ctr, {} );
+        let fieldsImpl = safeGetMetadata<ResolverMetaObjectMap>( META_KEY_RESOLVERS_MAP, ctr, {} );
 
         // Override middleware at the field level if they are not provided
         for ( let key in fieldsImpl ) {
@@ -62,8 +60,8 @@ export function ObjectImplementation( config: ObjectImplementationConfig = {} ) 
             description: desc
         };
 
-        Reflect.defineMetadata( META_KEY_METAOBJECT, md, ctr );
-        Reflect.defineMetadata( META_KEY_METAOBJECT_TYPE, METAOBJECT_TYPES.objectImplementation, ctr );
+        setMetadata( META_KEY_METAOBJECT, md, ctr );
+        setMetadata( META_KEY_METAOBJECT_TYPE, METAOBJECT_TYPES.objectImplementation, ctr );
     }
 }
 

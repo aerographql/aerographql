@@ -1,4 +1,3 @@
-import 'reflect-metadata';
 import { GraphQLString, GraphQLFloat, GraphQLInt, GraphQLID, GraphQLBoolean } from 'graphql';
 
 import { deduplicateArray } from './utilities';

@@ -3,7 +3,7 @@ import { GraphQLFieldConfig, GraphQLNonNull, GraphQLList } from 'graphql';
 import { MiddlewareInterface, createMiddlewareSequence } from '../middleware';
 import { ObjectDefinitionMetaObject } from '../object';
 import { ResolverMetaObject } from './resolver';
-import { isPromise, executeAsyncFunctionSequentialy, FactoryContext } from '../shared';
+import { isPromise, executeAsyncFunctionSequentialy, FactoryContext, callFunction } from '../shared';
 
 export let resolverConfigFactory = function ( metaObject: ResolverMetaObject, fieldName: string, factoryContext: FactoryContext, createResolver = true ) {
     let fieldConfig: GraphQLFieldConfig<any, any> = {
@@ -92,7 +92,7 @@ export let resolverConfigFactory = function ( metaObject: ResolverMetaObject, fi
             let p = executeAsyncFunctionSequentialy( middlewareSequence, [ source, args, context ] );
     
             return p.then( results => {
-                let p = Reflect.apply( resolveFunction, instance, expandedArgs );
+                let p = callFunction( resolveFunction, instance, expandedArgs );
                 return p;
             }, ( error ) => {
                 // Throw error, so it will be catched by the graphql layer

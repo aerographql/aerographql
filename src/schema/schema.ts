@@ -1,7 +1,6 @@
-import 'reflect-metadata';
 import {
     META_KEY_METAOBJECT, META_KEY_METAOBJECT_TYPE, getMetaObjectType,
-    getMetaObject, METAOBJECT_TYPES, isOfMetaObjectType, deduplicateArray
+    getMetaObject, METAOBJECT_TYPES, isOfMetaObjectType, deduplicateArray, setMetadata
 } from '../shared';
 import { Provider } from '../di';
 import { ObjectDefinitionMetaObject, ObjectImplementationMetaObject } from '../object';
@@ -133,8 +132,8 @@ export function Schema( config: SchemaConfig ) {
 
         md.components = deduplicateArray( config.components );
 
-        Reflect.defineMetadata( META_KEY_METAOBJECT, md, ctr );
-        Reflect.defineMetadata( META_KEY_METAOBJECT_TYPE, METAOBJECT_TYPES.schema, ctr );
+        setMetadata( META_KEY_METAOBJECT, md, ctr );
+        setMetadata( META_KEY_METAOBJECT_TYPE, METAOBJECT_TYPES.schema, ctr );
     }
 }
 export interface SchemaConfig {

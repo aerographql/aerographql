@@ -1,4 +1,3 @@
-import 'reflect-metadata';
 import { EventEmitter } from 'events'
 import * as httpMocks from 'node-mocks-http';
 import { ExpressHandler, graphqlExpress } from 'apollo-server-express';

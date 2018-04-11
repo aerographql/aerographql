@@ -1,5 +1,5 @@
-import "reflect-metadata";
-import { META_KEY_DESIGN_PARAMSTYPES, META_KEY_TOKEN } from '../shared'
+import { META_KEY_DESIGN_PARAMSTYPES, META_KEY_TOKEN } from '../shared/metaobject';
+import { getMetadata } from '../shared/utilities'
 import { Injectable } from './decorators';
 
 /**
@@ -81,14 +81,14 @@ export class Injector {
      * @param ctr
      */
     private getDependenciesTokens( ctr: Function ) {
-        let paramtypes: any[] = Reflect.getMetadata( META_KEY_DESIGN_PARAMSTYPES, ctr );
+        let paramtypes: any[] = getMetadata( META_KEY_DESIGN_PARAMSTYPES, ctr );
         if ( !paramtypes ) {
             paramtypes = [];
         }
 
         return paramtypes.map( ( p: any, index ) => {
 
-            let explicitToken = Reflect.getMetadata( META_KEY_TOKEN + index, ctr );
+            let explicitToken = getMetadata( META_KEY_TOKEN + index, ctr );
             if ( explicitToken )
                 return explicitToken;
 
