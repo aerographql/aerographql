@@ -48,7 +48,6 @@
         "typescript": "^2.6.2"
     },
     "dependencies": {
-        "graphql": "^0.13.2",
         "reflect-metadata": "^0.1.12"
     }
 }
