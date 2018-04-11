@@ -3,7 +3,7 @@ import { setMetadata } from '../shared';
 
 import {
     META_KEY_METAOBJECT_TYPE, METAOBJECT_TYPES,
-    deduplicateArray, getMetaObjectType, isPromise, callFunction
+     getMetaObjectType, isPromise, callFunction
 } from '../shared';
 
 /**

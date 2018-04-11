@@ -1,6 +1,5 @@
 import { GraphQLString, GraphQLFloat, GraphQLInt, GraphQLID, GraphQLBoolean } from 'graphql';
 
-import { deduplicateArray } from './utilities';
 import { getMetaObject, META_KEY_METAOBJECT_TYPE, METAOBJECT_TYPES, getMetaObjectType } from './metaobject';
 import { Injector } from '../di/injector';
 import { FieldMetaObject } from '../field/field';
